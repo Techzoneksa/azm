@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AZM Flow
 
-## Getting Started
+Operations management platform for AZM last-mile delivery, covering partner onboarding, contract management, dispatch operations, and shipment tracking.
 
-First, run the development server:
+## Completed Phases
+
+- **Phase 1** — Authentication, RBAC, user management, company profile, compliance readiness (government entities, licenses, documents)
+- **Phase 2** — Partner onboarding (e-commerce stores, contacts, integration settings), operational contracts, coverage areas, requirements, activity log, readiness scoring
+- **Phase 3** — Shipment management, dispatch, delivery attempts, proof of delivery, returns, import batches, operations reporting
+- **Brand Identity Update** — Logo, Droid Sans Arabic font, orange/dark blue brand colors applied system-wide
+
+## Prerequisites
+
+- Node.js 20+ (LTS recommended)
+- npm
+- PostgreSQL 15+ (running locally or via Docker)
+
+## Local Development Setup
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/Techzoneksa/azm.git
+cd azm
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up PostgreSQL and create a database named 'azm_flow'
+#    Then configure .env:
+cp .env.example .env
+# Edit .env with your local PostgreSQL credentials
+
+# 4. Generate Prisma client
+npm run db:generate
+
+# 5. Create and apply migrations
+npm run db:migrate:dev
+
+# 6. (Optional) Seed the database
+npm run seed
+
+# 7. Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Available Commands
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript type check |
+| `npm run format` | Format code with Prettier |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:migrate` | Apply pending migrations (production) |
+| `npm run db:migrate:dev` | Create and apply migrations (development) |
+| `npm run db:push` | Push schema directly (quick dev) |
+| `npm run seed` | Seed database with initial data |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+JWT_SECRET="replace-with-strong-random-secret"
+NEXT_PUBLIC_APP_NAME="AZM Flow"
+NEXT_PUBLIC_APP_URL="https://your-domain.com"
+NODE_ENV="production"
+```
 
-To learn more about Next.js, take a look at the following resources:
+> **IMPORTANT**: Never commit `.env` to Git. Use `.env.example` as a template.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Test Credentials
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After seeding, the following accounts are available:
 
-## Deploy on Vercel
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@azm.com` | `admin123` |
+| Operations | `ops@azm.com` | `ops123` |
+| Read-only | `readonly@azm.com` | `readonly123` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Production Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Database: PostgreSQL (SQLite is **not** used in production)
+- Deployment: See `docs/hostinger-deployment.md` for Hostinger setup
+- The application uses **npm** as the package manager (not pnpm)
+
+## GitHub Repository
+
+[https://github.com/Techzoneksa/azm](https://github.com/Techzoneksa/azm)
