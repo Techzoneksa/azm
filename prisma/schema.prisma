@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  phone         String?
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String?
+  updatedBy     String?
+
+  roles         UserRole[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  nameAr      String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  nameAr      String
+  description String?
+  module      String
+  createdAt   DateTime @default(now())
+
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model CompanyProfile {
+  id              String   @id @default(uuid())
+  nameAr          String
+  nameEn          String
+  tradingName     String?
+  commercialReg   String?
+  unifiedNumber   String?
+  taxNumber       String?
+  activityType    String?
+  foundedDate     DateTime?
+  city            String?
+  nationalAddress String?
+  shortAddress    String?
+  buildingNumber  String?
+  street          String?
+  district        String?
+  addressCity     String?
+  postalCode      String?
+  subNumber       String?
+  contactPhone    String?
+  contactEmail    String?
+  website         String?
+  logo            String?
+  managerName     String?
+  dataStatus      String   @default("DRAFT")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+}
+
+model GovernmentEntity {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  nameAr      String
+  description String?
+  websiteUrl  String?
+  servicesUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  complianceRecords ComplianceRecord[]
+  officialLinks     OfficialLink[]
+}
+
+model ComplianceRecord {
+  id                String   @id @default(uuid())
+  entityId          String
+  type              String
+  licenseNumber     String?
+  activityType      String?
+  status            String   @default("NOT_STARTED")
+  submittedDate     DateTime?
+  issuedDate        DateTime?
+  expiryDate        DateTime?
+  transactionNumber String?
+  requirements      String?
+  nextStep          String?
+  responsiblePerson String?
+  notes             String?
+  portalUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  entity      GovernmentEntity    @relation(fields: [entityId], references: [id])
+  documents   ComplianceDocument[]
+}
+
+model ComplianceDocument {
+  id              String   @id @default(uuid())
+  recordId        String
+  type            String
+  documentNumber  String?
+  issuedDate      DateTime?
+  expiryDate      DateTime?
+  status          String   @default("MISSING")
+  fileUrl         String?
+  notes           String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  record ComplianceRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+}
+
+model OfficialLink {
+  id              String   @id @default(uuid())
+  entityId        String
+  title           String
+  titleAr         String
+  description     String?
+  descriptionAr   String?
+  url             String
+  servicesUrl     String?
+  licensesUrl     String?
+  internalStatus  String?
+  transactionNo   String?
+  lastUpdated     DateTime?
+  nextStep        String?
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  entity GovernmentEntity @relation(fields: [entityId], references: [id])
+}
+
+model Driver {
+  id              String   @id @default(uuid())
+  fullName        String
+  phone           String
+  email           String?
+  nationalId      String   @unique
+  nationality     String?
+  dateOfBirth     DateTime?
+  city            String?
+  district        String?
+  relationType    String?
+  joinDate        DateTime?
+  status          String   @default("DRAFT")
+  experience      String?
+  previousCompanies String?
+  vehicleType     String?
+  plateNumber     String?
+  readinessStatus String   @default("INCOMPLETE")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  documents DriverDocument[]
+  vehicles  Vehicle[]
+}
+
+model DriverDocument {
+  id              String   @id @default(uuid())
+  driverId        String
+  type            String
+  documentNumber  String?
+  issuedDate      DateTime?
+  expiryDate      DateTime?
+  status          String   @default("MISSING")
+  fileUrl         String?
+  notes           String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+}
+
+model Vehicle {
+  id                String   @id @default(uuid())
+  vehicleType       String?
+  brand             String?
+  model             String?
+  year              Int?
+  color             String?
+  plateNumber       String?
+  serialNumber      String?
+  ownerName         String?
+  ownerNationalId   String?
+  ownershipType     String?
+  registrationNumber String?
+  insuranceNumber   String?
+  registrationExpiry DateTime?
+  insuranceExpiry   DateTime?
+  driverId          String?
+  status            String   @default("DRAFT")
+  readinessStatus   String   @default("INCOMPLETE")
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdBy         String?
+  updatedBy         String?
+
+  driver    Driver?            @relation(fields: [driverId], references: [id])
+  documents VehicleDocument[]
+}
+
+model VehicleDocument {
+  id              String   @id @default(uuid())
+  vehicleId       String
+  type            String
+  documentNumber  String?
+  issuedDate      DateTime?
+  expiryDate      DateTime?
+  status          String   @default("MISSING")
+  fileUrl         String?
+  notes           String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  updatedBy       String?
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model ReadinessCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  nameAr      String
+  description String?
+  weight      Float    @default(0.0)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       ReadinessItem[]
+  scores      ReadinessScore[]
+}
+
+model ReadinessItem {
+  id          String   @id @default(uuid())
+  categoryId  String
+  name        String
+  nameAr      String
+  description String?
+  isCompleted Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category ReadinessCategory @relation(fields: [categoryId], references: [id])
+}
+
+model ReadinessScore {
+  id            String   @id @default(uuid())
+  categoryId    String
+  categoryName  String
+  categoryNameAr String
+  weight        Float
+  score         Float
+  totalItems    Int
+  completedItems Int
+  calculatedAt  DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  category ReadinessCategory @relation(fields: [categoryId], references: [id])
+}
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  type      String   @default("STRING")
+  group     String?
+  description String?
+  isEncrypted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?
+  type      String
+  title     String
+  titleAr   String
+  message   String
+  messageAr String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  oldValue    String?
+  newValue    String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
