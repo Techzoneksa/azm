@@ -19,6 +19,10 @@ import {
   Menu,
   X,
   ChevronLeft,
+  Handshake,
+  FileText,
+  MapPin,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -36,6 +40,10 @@ const navItems: NavItem[] = [
   { labelKey: "officialLinks", href: "/official-links", icon: ExternalLink },
   { labelKey: "drivers", href: "/drivers", icon: Truck },
   { labelKey: "vehicles", href: "/vehicles", icon: Car },
+  { labelKey: "partners", href: "/partners", icon: Handshake },
+  { labelKey: "contracts", href: "/contracts", icon: FileText },
+  { labelKey: "pickupPoints", href: "/pickup-points", icon: MapPin },
+  { labelKey: "coverageAreas", href: "/coverage-areas", icon: Layers },
   { labelKey: "users", href: "/users", icon: Users },
   { labelKey: "settings", href: "/settings", icon: Settings },
 ];

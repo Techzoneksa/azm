@@ -368,3 +368,268 @@ model AuditLog {
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
+
+model Partner {
+  id                 String   @id @default(uuid())
+  tradingNameAr      String
+  tradingNameEn      String
+  legalName          String?
+  partnerType        String   @default("ECOMMERCE_STORE")
+  sector             String?
+  commercialReg      String?
+  taxNumber          String?
+  city               String?
+  country            String   @default("Saudi Arabia")
+  website            String?
+  officialEmail      String?
+  primaryPhone       String?
+  contactPersonName  String?
+  contactPersonPhone String?
+  contactPersonEmail String?
+  status             String   @default("LEAD")
+  priority           String   @default("MEDIUM")
+  source             String?
+  notes              String?
+  lastContactedAt    DateTime?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdBy          String?
+  updatedBy          String?
+
+  contacts          PartnerContact[]
+  contracts         OperationalContract[]
+  pickupPoints      PickupPoint[]
+  coverageAreas     CoverageArea[]
+  requirements      PartnerRequirement[]
+  integration       PartnerIntegrationSetting?
+  activities        ActivityLog[]
+
+  @@index([status])
+  @@index([partnerType])
+  @@index([city])
+  @@index([priority])
+}
+
+model PartnerContact {
+  id               String   @id @default(uuid())
+  partnerId        String
+  name             String
+  position         String?
+  department       String?
+  phone            String?
+  email            String?
+  contactType      String   @default("OPERATIONS")
+  isPrimary        Boolean  @default(false)
+  escalationLevel  Int?
+  notes            String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+}
+
+model OperationalContract {
+  id                   String   @id @default(uuid())
+  partnerId            String
+  contractNumber       String   @unique
+  name                 String
+  contractType         String   @default("STANDARD")
+  status               String   @default("DRAFT")
+  startDate            DateTime?
+  endDate              DateTime?
+  trialStartDate       DateTime?
+  goLiveDate           DateTime?
+  cities               String?
+  workingDays          String?
+  pickupStartTime      String?
+  pickupEndTime        String?
+  deliveryStartTime    String?
+  deliveryEndTime      String?
+  deliveryAttempts     Int      @default(2)
+  waitBetweenAttempts  String?
+  delayPolicy          String?
+  rejectionPolicy      String?
+  returnPolicy         String?
+  pickupPointIds       String?
+  slaLevel             String?
+  proofType            String   @default("OTP")
+  shipmentEntryChannel String   @default("MANUAL_ENTRY")
+  updateChannel        String   @default("PORTAL_ONLY")
+  azmResponsible       String?
+  partnerResponsible   String?
+  operationalNotes     String?
+  contractFileUrl      String?
+  readinessStatus      String   @default("INCOMPLETE")
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  partner        Partner                   @relation(fields: [partnerId], references: [id])
+  readinessItems ContractReadinessItem[]
+  coverageAreas  CoverageArea[]
+  requirements   PartnerRequirement[]
+  activities     ActivityLog[]
+
+  @@index([status])
+  @@index([partnerId])
+  @@index([contractType])
+}
+
+model PickupPoint {
+  id                   String   @id @default(uuid())
+  partnerId            String
+  name                 String
+  pointType            String   @default("WAREHOUSE")
+  city                 String?
+  district             String?
+  address              String?
+  nationalAddress      String?
+  shortAddress         String?
+  mapLink              String?
+  latitude             Float?
+  longitude            Float?
+  contactPerson        String?
+  contactPhone         String?
+  workingDays          String?
+  workingHours         String?
+  pickupInstructions   String?
+  requiresAppointment  Boolean  @default(false)
+  expectedWaitTime     String?
+  status               String   @default("DRAFT")
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  createdBy            String?
+  updatedBy            String?
+
+  partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId])
+  @@index([city])
+  @@index([status])
+}
+
+model CoverageArea {
+  id                    String   @id @default(uuid())
+  partnerId             String?
+  contractId            String?
+  city                  String
+  operationalZone       String?
+  districts             String?
+  coverageType          String   @default("FULL_CITY")
+  coverageDays          String?
+  coverageStartTime     String?
+  coverageEndTime       String?
+  minExpectedShipments  Int?
+  maxExpectedShipments  Int?
+  needsDedicatedDrivers Boolean  @default(false)
+  status                String   @default("PLANNED")
+  notes                 String?
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  createdBy             String?
+  updatedBy             String?
+
+  partner  Partner?            @relation(fields: [partnerId], references: [id])
+  contract OperationalContract? @relation(fields: [contractId], references: [id])
+
+  @@index([city])
+  @@index([partnerId])
+  @@index([contractId])
+  @@index([status])
+}
+
+model PartnerRequirement {
+  id          String   @id @default(uuid())
+  partnerId   String?
+  contractId  String?
+  name        String
+  description String?
+  isMandatory Boolean  @default(true)
+  isCompleted Boolean  @default(false)
+  assignedTo  String?
+  dueDate     DateTime?
+  status      String   @default("NOT_STARTED")
+  notes       String?
+  completedAt DateTime?
+  completedBy String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  partner  Partner?            @relation(fields: [partnerId], references: [id])
+  contract OperationalContract? @relation(fields: [contractId], references: [id])
+
+  @@index([partnerId])
+  @@index([contractId])
+  @@index([status])
+}
+
+model ContractReadinessItem {
+  id          String   @id @default(uuid())
+  contractId  String
+  itemKey     String
+  name        String
+  nameAr      String
+  isMandatory Boolean  @default(true)
+  isCompleted Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contract OperationalContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId])
+}
+
+model PartnerIntegrationSetting {
+  id                 String   @id @default(uuid())
+  partnerId          String   @unique
+  entryChannel       String   @default("MANUAL_ENTRY")
+  updateChannel      String   @default("PORTAL_ONLY")
+  hasApiKey          Boolean  @default(false)
+  apiStatus          String   @default("NOT_CONFIGURED")
+  sandboxUrl         String?
+  productionUrl      String?
+  webhookUrl         String?
+  webhookSecret      String?
+  excelFormat        String?
+  csvFormat          String?
+  lastTestedAt       DateTime?
+  integrationStatus  String   @default("NOT_CONFIGURED")
+  technicalNotes     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id            String   @id @default(uuid())
+  partnerId     String?
+  contractId    String?
+  activityType  String   @default("NOTE")
+  title         String
+  description   String?
+  userId        String?
+  attachments   String?
+  needsFollowUp Boolean  @default(false)
+  followUpDate  DateTime?
+  status        String   @default("OPEN")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  partner  Partner?            @relation(fields: [partnerId], references: [id])
+  contract OperationalContract? @relation(fields: [contractId], references: [id])
+
+  @@index([partnerId])
+  @@index([contractId])
+  @@index([activityType])
+  @@index([status])
+}
