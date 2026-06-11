@@ -10,6 +10,23 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Seeding AZM Flow database...");
 
+  await prisma.shipmentReturn.deleteMany();
+  await prisma.proofOfDelivery.deleteMany();
+  await prisma.deliveryAttempt.deleteMany();
+  await prisma.shipmentAssignment.deleteMany();
+  await prisma.shipmentImportRow.deleteMany();
+  await prisma.shipmentImportBatch.deleteMany();
+  await prisma.shipmentStatusHistory.deleteMany();
+  await prisma.shipment.deleteMany();
+  await prisma.activityLog.deleteMany();
+  await prisma.partnerIntegrationSetting.deleteMany();
+  await prisma.contractReadinessItem.deleteMany();
+  await prisma.partnerRequirement.deleteMany();
+  await prisma.coverageArea.deleteMany();
+  await prisma.pickupPoint.deleteMany();
+  await prisma.operationalContract.deleteMany();
+  await prisma.partnerContact.deleteMany();
+  await prisma.partner.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.systemSetting.deleteMany();
@@ -59,6 +76,20 @@ async function main() {
     prisma.permission.create({ data: { name: "requirements.manage", nameAr: "إدارة المتطلبات", module: "requirements" } }),
     prisma.permission.create({ data: { name: "activities.view", nameAr: "عرض النشاطات", module: "activities" } }),
     prisma.permission.create({ data: { name: "activities.manage", nameAr: "إدارة النشاطات", module: "activities" } }),
+    prisma.permission.create({ data: { name: "shipments.view", nameAr: "عرض الشحنات", module: "shipments" } }),
+    prisma.permission.create({ data: { name: "shipments.manage", nameAr: "إدارة الشحنات", module: "shipments" } }),
+    prisma.permission.create({ data: { name: "shipments.import", nameAr: "استيراد الشحنات", module: "shipments" } }),
+    prisma.permission.create({ data: { name: "shipments.assign", nameAr: "إسناد الشحنات", module: "shipments" } }),
+    prisma.permission.create({ data: { name: "shipments.status_update", nameAr: "تحديث حالة الشحنات", module: "shipments" } }),
+    prisma.permission.create({ data: { name: "dispatch.view", nameAr: "عرض لوحة التوزيع", module: "dispatch" } }),
+    prisma.permission.create({ data: { name: "dispatch.manage", nameAr: "إدارة لوحة التوزيع", module: "dispatch" } }),
+    prisma.permission.create({ data: { name: "delivery_attempts.view", nameAr: "عرض محاولات التسليم", module: "delivery_attempts" } }),
+    prisma.permission.create({ data: { name: "delivery_attempts.manage", nameAr: "إدارة محاولات التسليم", module: "delivery_attempts" } }),
+    prisma.permission.create({ data: { name: "pod.view", nameAr: "عرض إثبات التسليم", module: "pod" } }),
+    prisma.permission.create({ data: { name: "pod.manage", nameAr: "إدارة إثبات التسليم", module: "pod" } }),
+    prisma.permission.create({ data: { name: "returns.view", nameAr: "عرض المرتجعات", module: "returns" } }),
+    prisma.permission.create({ data: { name: "returns.manage", nameAr: "إدارة المرتجعات", module: "returns" } }),
+    prisma.permission.create({ data: { name: "operations_reports.view", nameAr: "عرض تقارير التشغيل", module: "operations_reports" } }),
   ]);
 
   const permMap = Object.fromEntries(permissions.map((p: { name: string; id: string }) => [p.name, p.id]));
@@ -79,12 +110,12 @@ async function main() {
     await prisma.rolePermission.create({ data: { roleId: superAdminRole.id, permissionId: permId } });
   }
 
-  const opsManagerPerms = ["drivers.manage", "drivers.view", "vehicles.manage", "vehicles.view", "company.manage", "company.view", "compliance.manage", "compliance.view", "readiness.view", "readiness.manage", "reports.view", "audit.read", "partners.view", "partners.manage", "contracts.view", "contracts.manage", "pickup_points.view", "pickup_points.manage", "coverage_areas.view", "coverage_areas.manage", "requirements.view", "requirements.manage", "activities.view", "activities.manage"];
+  const opsManagerPerms = ["drivers.manage", "drivers.view", "vehicles.manage", "vehicles.view", "company.manage", "company.view", "compliance.manage", "compliance.view", "readiness.view", "readiness.manage", "reports.view", "audit.read", "partners.view", "partners.manage", "contracts.view", "contracts.manage", "pickup_points.view", "pickup_points.manage", "coverage_areas.view", "coverage_areas.manage", "requirements.view", "requirements.manage", "activities.view", "activities.manage", "shipments.view", "shipments.manage", "shipments.import", "shipments.assign", "shipments.status_update", "dispatch.view", "dispatch.manage", "delivery_attempts.view", "delivery_attempts.manage", "pod.view", "pod.manage", "returns.view", "returns.manage", "operations_reports.view"];
   for (const permName of opsManagerPerms) {
     await prisma.rolePermission.create({ data: { roleId: opsManagerRole.id, permissionId: permMap[permName] } });
   }
 
-  const opsCoordPerms = ["drivers.view", "vehicles.view", "company.view", "compliance.view", "readiness.view", "partners.view", "contracts.view", "pickup_points.view", "coverage_areas.view", "requirements.view", "activities.manage"];
+  const opsCoordPerms = ["drivers.view", "vehicles.view", "company.view", "compliance.view", "readiness.view", "partners.view", "contracts.view", "pickup_points.view", "coverage_areas.view", "requirements.view", "activities.manage", "shipments.view", "shipments.manage", "shipments.import", "shipments.assign", "shipments.status_update", "dispatch.view", "dispatch.manage", "delivery_attempts.view", "delivery_attempts.manage", "pod.view", "pod.manage", "returns.view", "returns.manage", "operations_reports.view"];
   for (const permName of opsCoordPerms) {
     await prisma.rolePermission.create({ data: { roleId: opsCoordinatorRole.id, permissionId: permMap[permName] } });
   }
@@ -903,6 +934,158 @@ async function main() {
     },
   });
 
+  // ========== Phase 3: Shipments & Dispatch ==========
+  const shipmentData = [
+    { partner: partner1, contract: contract1, ref: "SAREEC3-001", order: "ORD-001", recipient: "أحمد الزهراني", phone: "0555000101", city: "جدة", district: "الشاطئ", address: "شارع الأمير سلطان", status: "DELIVERED", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "هاتف جوال" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-002", order: "ORD-002", recipient: "فاطمة القحطاني", phone: "0555000102", city: "جدة", district: "الجامعة", address: "شارع عبدالله السليمان", status: "DELIVERED", type: "STANDARD", priority: "HIGH", pieces: 2, desc: "ملابس" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-003", order: "ORD-003", recipient: "ماجد الشهراني", phone: "0555000103", city: "جدة", district: "الموز", status: "OUT_FOR_DELIVERY", type: "EXPRESS", priority: "URGENT", pieces: 1, desc: "جهاز لابتوب" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-004", order: "ORD-004", recipient: "نورة البقمي", phone: "0555000104", city: "جدة", district: "البساتين", status: "ASSIGNED_TO_DRIVER", type: "STANDARD", priority: "NORMAL", pieces: 3, desc: "أدوات منزلية" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-005", order: "ORD-005", recipient: "سعد الدوسري", phone: "0555000105", city: "جدة", district: "الخالدية", status: "READY_FOR_DISPATCH", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "كتاب" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-006", order: "ORD-006", recipient: "هند العتيبي", phone: "0555000106", city: "جدة", district: "البلد", status: "NEW", type: "STANDARD", priority: "LOW", pieces: 1, desc: "مستندات" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-007", order: "ORD-007", recipient: "عبدالله الغامدي", phone: "0555000107", city: "جدة", district: "الرويس", status: "FAILED_ATTEMPT", type: "STANDARD", priority: "NORMAL", pieces: 2, desc: "مواد غذائية" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-008", order: "ORD-008", recipient: "منى الزائري", phone: "0555000108", city: "جدة", district: "الحمراء", status: "RETURN_PENDING", type: "SCHEDULED", priority: "NORMAL", pieces: 1, desc: "ساعة" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-009", order: "ORD-009", recipient: "ياسر المالكي", phone: "0555000109", city: "جدة", district: "السلامة", status: "DELIVERED", type: "STANDARD", priority: "HIGH", pieces: 4, desc: "أجهزة إلكترونية" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-010", order: "ORD-010", recipient: "ليلى الشمراني", phone: "0555000110", city: "جدة", district: "الشاطئ", status: "NEW", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "مكياج" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-011", order: "ORD-011", recipient: "سلطان العلي", phone: "0555000111", city: "جدة", district: "الجامعة", status: "CUSTOMER_NOT_RESPONDING", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "مستندات رسمية" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-012", order: "ORD-012", recipient: "أمل الحربي", phone: "0555000112", city: "جدة", district: "الموز", status: "RETURNED_TO_PARTNER", type: "RETURN_PICKUP", priority: "NORMAL", pieces: 1, desc: "جهاز تالف" },
+    { partner: partner2, contract: null, ref: "MASAR-001", order: "M-ORD-001", recipient: "وائل السبيعي", phone: "0555000201", city: "الرياض", district: "النرجس", address: "شارع الأمير مشعل", status: "DELIVERED", type: "STANDARD", priority: "NORMAL", pieces: 2, desc: "مستلزمات مكتبية" },
+    { partner: partner2, contract: null, ref: "MASAR-002", order: "M-ORD-002", recipient: "بدر الشمري", phone: "0555000202", city: "الرياض", district: "الملز", address: "شارع الريل", status: "ASSIGNED_TO_DRIVER", type: "EXPRESS", priority: "URGENT", pieces: 1, desc: "جهاز طبي" },
+    { partner: partner2, contract: null, ref: "MASAR-003", order: "M-ORD-003", recipient: "ريم العنزي", phone: "0555000203", city: "الرياض", district: "العليا", status: "READY_FOR_DISPATCH", type: "STANDARD", priority: "HIGH", pieces: 3, desc: "حلويات" },
+    { partner: partner2, contract: null, ref: "MASAR-004", order: "M-ORD-004", recipient: "مشعل الدوسري", phone: "0555000204", city: "الرياض", district: "الرياض", status: "NEW", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "مستندات" },
+    { partner: partner2, contract: null, ref: "MASAR-005", order: "M-ORD-005", recipient: "نوف المطيري", phone: "0555000205", city: "الرياض", district: "الورود", status: "FAILED_ATTEMPT", type: "NEXT_DAY", priority: "NORMAL", pieces: 1, desc: "إكسسوارات" },
+    { partner: partner2, contract: null, ref: "MASAR-006", order: "M-ORD-006", recipient: "تركي البقمي", phone: "0555000206", city: "الرياض", district: "النرجس", status: "RETURN_PENDING", type: "STANDARD", priority: "NORMAL", pieces: 2, desc: "ملابس" },
+    { partner: partner2, contract: null, ref: "MASAR-007", order: "M-ORD-007", recipient: "سامي الحارثي", phone: "0555000207", city: "الرياض", district: "الملز", status: "DELIVERED", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "جهاز لوحي" },
+    { partner: partner2, contract: null, ref: "MASAR-008", order: "M-ORD-008", recipient: "رنا القرشي", phone: "0555000208", city: "الرياض", district: "العليا", status: "OUT_FOR_DELIVERY", type: "SAME_DAY", priority: "URGENT", pieces: 1, desc: "مستندات عاجلة" },
+    { partner: partner2, contract: null, ref: "MASAR-009", order: "M-ORD-009", recipient: "عبدالرحمن الزهراني", phone: "0555000209", city: "الرياض", district: "الرياض", status: "CUSTOMER_REQUESTED_RESCHEDULE", type: "STANDARD", priority: "LOW", pieces: 1, desc: "كتاب" },
+    { partner: partner2, contract: null, ref: "MASAR-010", order: "M-ORD-010", recipient: "مريم الشهري", phone: "0555000210", city: "الرياض", district: "الورود", status: "ON_HOLD", type: "STANDARD", priority: "NORMAL", pieces: 3, desc: "هدايا" },
+    { partner: partner3, contract: null, ref: "SOUQ-001", order: "S-ORD-001", recipient: "فارس العبدالله", phone: "0555000301", city: "مكة", district: "العزيزية", status: "NEW", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "عطر" },
+    { partner: partner3, contract: null, ref: "SOUQ-002", order: "S-ORD-002", recipient: "لينا الجهني", phone: "0555000302", city: "مكة", district: "الشوقية", status: "NEW", type: "STANDARD", priority: "NORMAL", pieces: 2, desc: "ألعاب أطفال" },
+    { partner: partner3, contract: null, ref: "SOUQ-003", order: "S-ORD-003", recipient: "غادة الغامدي", phone: "0555000303", city: "مكة", district: "الخالدية", status: "RECEIVED_FROM_PARTNER", type: "STANDARD", priority: "HIGH", pieces: 1, desc: "ساعة" },
+    { partner: partner3, contract: null, ref: "SOUQ-004", order: "S-ORD-004", recipient: "حاتم الزهراني", phone: "0555000304", city: "مكة", district: "الزاهر", status: "READY_FOR_DISPATCH", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "مستندات" },
+    { partner: partner3, contract: null, ref: "SOUQ-005", order: "S-ORD-005", recipient: "تهاني المالكي", phone: "0555000305", city: "مكة", district: "العزيزية", status: "NEEDS_REVIEW", type: "OTHER", priority: "NORMAL", pieces: 1, desc: "أغراض متنوعة" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-013", order: "ORD-013", recipient: "خالد القحطاني", phone: "0555000113", city: "مكة", district: "العزيزية", status: "ASSIGNED_TO_DRIVER", type: "NEXT_DAY", priority: "HIGH", pieces: 1, desc: "جهاز" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-014", order: "ORD-014", recipient: "سارة الدوسري", phone: "0555000114", city: "جدة", district: "الشاطئ", status: "OUT_FOR_DELIVERY", type: "STANDARD", priority: "NORMAL", pieces: 1, desc: "ملابس" },
+    { partner: partner1, contract: contract1, ref: "SAREEC3-015", order: "ORD-015", recipient: "نواف العتيبي", phone: "0555000115", city: "جدة", district: "الجامعة", status: "READY_FOR_DISPATCH", type: "EXPRESS", priority: "URGENT", pieces: 2, desc: "مستلزمات طبية" },
+  ];
+
+  const shipmentIds: string[] = [];
+  for (const s of shipmentData) {
+    const shipment = await prisma.shipment.create({
+      data: {
+        trackingNumber: `AZM-${s.ref}`,
+        partnerReference: s.ref,
+        orderNumber: s.order,
+        partnerId: s.partner.id,
+        contractId: s.contract?.id,
+        recipientName: s.recipient,
+        recipientPhone: s.phone,
+        city: s.city,
+        district: s.district,
+        address: s.address || "",
+        packageDescription: s.desc,
+        pieces: s.pieces,
+        shipmentType: s.type,
+        priority: s.priority,
+        status: s.status,
+        entrySource: "MANUAL",
+        validationStatus: "VALID",
+      },
+    });
+    shipmentIds.push(shipment.id);
+
+    const oldStatus = s.status !== "NEW" ? "NEW" : null;
+    if (oldStatus) {
+      await prisma.shipmentStatusHistory.create({
+        data: {
+          shipmentId: shipment.id,
+          oldStatus,
+          newStatus: s.status,
+          changedBy: "seed",
+          source: "SYSTEM",
+        },
+      });
+    }
+  }
+
+  // Delivery Attempts
+  await prisma.deliveryAttempt.create({
+    data: { shipmentId: shipmentIds[6], driverId: driver1.id, attemptNumber: 1, status: "CUSTOMER_NOT_RESPONDING", reason: "العميل لا يرد على الهاتف", attemptedAt: new Date("2025-07-01T10:00:00"), nextAttemptAt: new Date("2025-07-02T10:00:00") },
+  });
+  await prisma.deliveryAttempt.create({
+    data: { shipmentId: shipmentIds[6], driverId: driver1.id, attemptNumber: 2, status: "FAILED", reason: "العميل لم يتواجد في المنزل", attemptedAt: new Date("2025-07-02T10:00:00") },
+  });
+  await prisma.deliveryAttempt.create({
+    data: { shipmentId: shipmentIds[16], driverId: driver1.id, attemptNumber: 1, status: "WRONG_ADDRESS", reason: "العنوان غير صحيح", notes: "رقم المبنى خطأ", attemptedAt: new Date("2025-07-03T10:00:00") },
+  });
+  await prisma.deliveryAttempt.create({
+    data: { shipmentId: shipmentIds[20], driverId: driver1.id, attemptNumber: 1, status: "CUSTOMER_REQUESTED_RESCHEDULE", reason: "العميل طلب تأجيل للتسلم", notes: "طلب التأجيل ليوم الخميس", attemptedAt: new Date("2025-07-04T10:00:00"), nextAttemptAt: new Date("2025-07-06T10:00:00") },
+  });
+  await prisma.deliveryAttempt.create({
+    data: { shipmentId: shipmentIds[0], driverId: driver1.id, attemptNumber: 1, status: "SUCCESS", notes: "تم التسليم للعميل", attemptedAt: new Date("2025-07-01T14:30:00") },
+  });
+
+  // Proof of Delivery
+  await prisma.proofOfDelivery.create({
+    data: { shipmentId: shipmentIds[0], deliveredAt: new Date("2025-07-01T14:30:00"), deliveredByDriverId: driver1.id, receiverName: "أحمد الزهراني", receiverPhone: "0555000101", notes: "استلم العميل الطلب بنفسه" },
+  });
+  await prisma.proofOfDelivery.create({
+    data: { shipmentId: shipmentIds[1], deliveredAt: new Date("2025-07-01T15:00:00"), deliveredByDriverId: driver1.id, receiverName: "فاطمة القحطاني", receiverPhone: "0555000102", notes: "استلمت العميلة الطلب" },
+  });
+  await prisma.proofOfDelivery.create({
+    data: { shipmentId: shipmentIds[8], deliveredAt: new Date("2025-07-02T11:00:00"), deliveredByDriverId: driver1.id, receiverName: "ياسر المالكي", receiverPhone: "0555000109", otpCodeMasked: "***123", notes: "تم التحقق عبر OTP" },
+  });
+  await prisma.proofOfDelivery.create({
+    data: { shipmentId: shipmentIds[12], deliveredAt: new Date("2025-07-03T13:00:00"), deliveredByDriverId: driver1.id, receiverName: "وائل السبيعي", receiverPhone: "0555000201", notes: "استلم المكتب" },
+  });
+  await prisma.proofOfDelivery.create({
+    data: { shipmentId: shipmentIds[18], deliveredAt: new Date("2025-07-04T09:30:00"), deliveredByDriverId: driver1.id, receiverName: "سامي الحارثي", receiverPhone: "0555000207", notes: "تم التسليم لجار العميل" },
+  });
+
+  // Shipment Returns
+  await prisma.shipmentReturn.create({
+    data: { shipmentId: shipmentIds[7], reason: "CUSTOMER_NOT_RESPONDING", status: "RETURN_PENDING", returnDueAt: new Date("2025-07-10"), notes: "محاولتين فاشلتين - بانتظار التنسيق مع الشريك" },
+  });
+  await prisma.shipmentReturn.create({
+    data: { shipmentId: shipmentIds[11], reason: "CUSTOMER_REFUSED", status: "RETURNED_TO_PARTNER", returnRequestedAt: new Date("2025-07-02"), returnedAt: new Date("2025-07-05"), returnedToPartnerBy: "خالد الحربي", receivedByPartnerName: "مستودع السريع", notes: "العميل رفض الاستلام بسبب تلف المنتج" },
+  });
+  await prisma.shipmentReturn.create({
+    data: { shipmentId: shipmentIds[17], reason: "MAX_ATTEMPTS_REACHED", status: "RETURN_PENDING", returnDueAt: new Date("2025-07-12"), notes: "3 محاولات فاشلة - سيعاد للشريك" },
+  });
+
+  // Import Batch
+  const importBatch = await prisma.shipmentImportBatch.create({
+    data: {
+      partnerId: partner1.id,
+      contractId: contract1.id,
+      fileName: "shippments-july-2025.xlsx",
+      fileType: "EXCEL",
+      totalRows: 5,
+      validRows: 3,
+      errorRows: 1,
+      duplicateRows: 1,
+      status: "CONFIRMED",
+      uploadedBy: opsManager.id,
+      confirmedAt: new Date("2025-07-01"),
+      notes: "شحنة تجريبية للاستيراد",
+    },
+  });
+
+  await prisma.shipmentImportRow.create({
+    data: { batchId: importBatch.id, rowNumber: 1, rawData: JSON.stringify({ partnerReference: "IMP-001", orderNumber: "IMP-ORD-001", recipientName: "عميل تجريبي", recipientPhone: "0555000401", city: "جدة", district: "الشاطئ" }), normalizedData: JSON.stringify({ recipientName: "عميل تجريبي", recipientPhone: "0555000401" }), validationStatus: "VALID" },
+  });
+  await prisma.shipmentImportRow.create({
+    data: { batchId: importBatch.id, rowNumber: 2, rawData: JSON.stringify({ partnerReference: "IMP-002", orderNumber: "IMP-ORD-002", recipientName: "عميل تجريبي 2", recipientPhone: "0555000402", city: "جدة", district: "الجامعة" }), normalizedData: JSON.stringify({ recipientName: "عميل تجريبي 2", recipientPhone: "0555000402" }), validationStatus: "VALID" },
+  });
+  await prisma.shipmentImportRow.create({
+    data: { batchId: importBatch.id, rowNumber: 3, rawData: JSON.stringify({ partnerReference: "IMP-003", orderNumber: "IMP-ORD-003", recipientName: "عميل تجريبي 3", recipientPhone: "0555000403", city: "جدة", district: "الموز" }), normalizedData: JSON.stringify({ recipientName: "عميل تجريبي 3", recipientPhone: "0555000403" }), validationStatus: "VALID" },
+  });
+  await prisma.shipmentImportRow.create({
+    data: { batchId: importBatch.id, rowNumber: 4, rawData: JSON.stringify({ partnerReference: "IMP-DUP", orderNumber: "IMP-ORD-001" }), validationStatus: "DUPLICATE", validationErrors: JSON.stringify(["رقم الطلب مكرر"]) },
+  });
+  await prisma.shipmentImportRow.create({
+    data: { batchId: importBatch.id, rowNumber: 5, rawData: JSON.stringify({ partnerReference: "IMP-ERR" }), validationStatus: "MISSING_REQUIRED_FIELDS", validationErrors: JSON.stringify(["اسم المستلم مطلوب", "رقم الجوال مطلوب"]) },
+  });
+
   console.log("✅ Seed completed successfully!");
   console.log("");
   console.log("📋 Users created:");
@@ -910,6 +1093,7 @@ async function main() {
   console.log("   manager@azmflow.com / Admin@123 (OPERATIONS_MANAGER)");
   console.log("   coordinator@azmflow.com / Admin@123 (OPERATIONS_COORDINATOR)");
   console.log("📦 Phase 2: 3 Partners, 3 Contracts, 3 Pickup Points, 3 Coverage Areas");
+  console.log("📦 Phase 3: 30 Shipments, 5 Delivery Attempts, 5 PODs, 3 Returns, 1 Import Batch");
 }
 
 main()

@@ -23,6 +23,11 @@ import {
   FileText,
   MapPin,
   Layers,
+  Package,
+  Upload,
+  Radio,
+  ArrowLeftRight,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -44,6 +49,11 @@ const navItems: NavItem[] = [
   { labelKey: "contracts", href: "/contracts", icon: FileText },
   { labelKey: "pickupPoints", href: "/pickup-points", icon: MapPin },
   { labelKey: "coverageAreas", href: "/coverage-areas", icon: Layers },
+  { labelKey: "shipments", href: "/shipments", icon: Package },
+  { labelKey: "shipmentImport", href: "/shipments/import", icon: Upload },
+  { labelKey: "dispatch", href: "/dispatch", icon: Radio },
+  { labelKey: "returns", href: "/returns", icon: ArrowLeftRight },
+  { labelKey: "operationsReports", href: "/reports/operations", icon: BarChart3 },
   { labelKey: "users", href: "/users", icon: Users },
   { labelKey: "settings", href: "/settings", icon: Settings },
 ];

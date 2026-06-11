@@ -212,6 +212,9 @@ model Driver {
 
   documents DriverDocument[]
   vehicles  Vehicle[]
+  shipments Shipment[]
+  assignments ShipmentAssignment[]
+  deliveryAttempts DeliveryAttempt[]
 }
 
 model DriverDocument {
@@ -404,6 +407,8 @@ model Partner {
   requirements      PartnerRequirement[]
   integration       PartnerIntegrationSetting?
   activities        ActivityLog[]
+  shipments         Shipment[]
+  importBatches     ShipmentImportBatch[]
 
   @@index([status])
   @@index([partnerType])
@@ -475,6 +480,8 @@ model OperationalContract {
   coverageAreas  CoverageArea[]
   requirements   PartnerRequirement[]
   activities     ActivityLog[]
+  shipments      Shipment[]
+  importBatches  ShipmentImportBatch[]
 
   @@index([status])
   @@index([partnerId])
@@ -508,7 +515,8 @@ model PickupPoint {
   createdBy            String?
   updatedBy            String?
 
-  partner Partner @relation(fields: [partnerId], references: [id])
+  partner  Partner   @relation(fields: [partnerId], references: [id])
+  shipments Shipment[]
 
   @@index([partnerId])
   @@index([city])
@@ -539,6 +547,7 @@ model CoverageArea {
 
   partner  Partner?            @relation(fields: [partnerId], references: [id])
   contract OperationalContract? @relation(fields: [contractId], references: [id])
+  shipments Shipment[]
 
   @@index([city])
   @@index([partnerId])
@@ -631,5 +640,228 @@ model ActivityLog {
   @@index([partnerId])
   @@index([contractId])
   @@index([activityType])
+  @@index([status])
+}
+
+model Shipment {
+  id                  String   @id @default(uuid())
+  trackingNumber      String   @unique
+  partnerReference    String?
+  orderNumber         String?
+  partnerId           String
+  contractId          String?
+  pickupPointId       String?
+  coverageAreaId      String?
+  driverId            String?
+
+  recipientName       String
+  recipientPhone      String
+  recipientEmail      String?
+  city                String?
+  district            String?
+  address             String?
+  nationalAddress     String?
+  shortAddress        String?
+  buildingNumber      String?
+  street              String?
+  postalCode          String?
+  subNumber           String?
+  locationUrl         String?
+  latitude            Float?
+  longitude           Float?
+
+  packageDescription  String?
+  pieces              Int      @default(1)
+  weight              Float?
+  shipmentType        String   @default("STANDARD")
+  priority            String   @default("NORMAL")
+
+  deliveryDate        DateTime?
+  deliveryWindow      String?
+  customerNotes       String?
+  partnerInstructions String?
+  internalNotes       String?
+
+  status              String   @default("NEW")
+  entrySource         String   @default("MANUAL")
+  validationStatus    String   @default("NEEDS_REVIEW")
+
+  lastStatusUpdate    DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdBy           String?
+  updatedBy           String?
+
+  partner             Partner                @relation(fields: [partnerId], references: [id])
+  contract            OperationalContract?   @relation(fields: [contractId], references: [id])
+  pickupPoint         PickupPoint?           @relation(fields: [pickupPointId], references: [id])
+  coverageArea        CoverageArea?          @relation(fields: [coverageAreaId], references: [id])
+  driver              Driver?                @relation(fields: [driverId], references: [id])
+  statusHistory       ShipmentStatusHistory[]
+  deliveryAttempts    DeliveryAttempt[]
+  proofOfDelivery     ProofOfDelivery?
+  returns             ShipmentReturn[]
+  assignments         ShipmentAssignment[]
+  importRows          ShipmentImportRow[]
+
+  @@index([trackingNumber])
+  @@index([partnerReference])
+  @@index([orderNumber])
+  @@index([partnerId])
+  @@index([contractId])
+  @@index([status])
+  @@index([driverId])
+  @@index([city])
+  @@index([deliveryDate])
+  @@index([createdAt])
+}
+
+model ShipmentStatusHistory {
+  id          String   @id @default(uuid())
+  shipmentId  String
+  oldStatus   String?
+  newStatus   String
+  changedBy   String?
+  reason      String?
+  notes       String?
+  source      String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId])
+  @@index([createdAt])
+}
+
+model ShipmentImportBatch {
+  id             String   @id @default(uuid())
+  partnerId      String
+  contractId     String?
+  fileName       String
+  fileType       String   @default("EXCEL")
+  totalRows      Int      @default(0)
+  validRows      Int      @default(0)
+  errorRows      Int      @default(0)
+  duplicateRows  Int      @default(0)
+  status         String   @default("UPLOADED")
+  uploadedBy     String?
+  uploadedAt     DateTime @default(now())
+  confirmedAt    DateTime?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  partner  Partner?          @relation(fields: [partnerId], references: [id])
+  contract OperationalContract? @relation(fields: [contractId], references: [id])
+  rows     ShipmentImportRow[]
+
+  @@index([partnerId])
+  @@index([status])
+  @@index([uploadedAt])
+}
+
+model ShipmentImportRow {
+  id                String   @id @default(uuid())
+  batchId           String
+  rowNumber         Int
+  rawData           String
+  normalizedData    String?
+  validationStatus  String   @default("PENDING")
+  validationErrors  String?
+  createdShipmentId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  batch    ShipmentImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  shipment Shipment?           @relation(fields: [createdShipmentId], references: [id])
+
+  @@index([batchId])
+  @@index([validationStatus])
+}
+
+model ShipmentAssignment {
+  id           String    @id @default(uuid())
+  shipmentId   String
+  driverId     String
+  assignedBy   String?
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+  status       String    @default("ASSIGNED")
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  driver   Driver   @relation(fields: [driverId], references: [id])
+
+  @@index([shipmentId])
+  @@index([driverId])
+  @@index([status])
+}
+
+model DeliveryAttempt {
+  id             String    @id @default(uuid())
+  shipmentId     String
+  driverId       String?
+  attemptNumber  Int
+  status         String    @default("FAILED")
+  reason         String?
+  notes          String?
+  attemptedAt    DateTime  @default(now())
+  nextAttemptAt  DateTime?
+  createdBy      String?
+  evidenceFile   String?
+  locationLat    Float?
+  locationLng    Float?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  driver   Driver?  @relation(fields: [driverId], references: [id])
+
+  @@index([shipmentId])
+  @@index([driverId])
+  @@index([attemptNumber])
+}
+
+model ProofOfDelivery {
+  id                 String   @id @default(uuid())
+  shipmentId         String   @unique
+  deliveredAt        DateTime @default(now())
+  deliveredByDriverId String?
+  receiverName       String?
+  receiverPhone      String?
+  otpCodeMasked      String?
+  signatureFile      String?
+  photoFile          String?
+  locationLat        Float?
+  locationLng        Float?
+  notes              String?
+  createdBy          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+}
+
+model ShipmentReturn {
+  id                   String   @id @default(uuid())
+  shipmentId           String
+  reason               String
+  status               String   @default("RETURN_PENDING")
+  returnRequestedAt    DateTime @default(now())
+  returnDueAt          DateTime?
+  returnedAt           DateTime?
+  returnedToPartnerBy  String?
+  receivedByPartnerName String?
+  proofFile            String?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId])
   @@index([status])
 }
