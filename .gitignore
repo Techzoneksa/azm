@@ -47,4 +47,8 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# Dev server logs.server-*.log
+# Dev server logs
+.server-*.log
+
+# Source logo (already copied to public/)
+logo.svg
