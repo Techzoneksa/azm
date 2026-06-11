@@ -16,7 +16,7 @@ const sizeMap = {
 };
 
 const variantMap = {
-  default: "bg-blue-600",
+  default: "bg-brand-orange",
   success: "bg-green-600",
   warning: "bg-amber-500",
   danger: "bg-red-600",

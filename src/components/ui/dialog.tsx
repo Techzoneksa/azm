@@ -105,7 +105,7 @@ const DialogContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
         >
           <button
             onClick={onClose}
-            className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2"
           >
             <X className="size-4" />
             <span className="sr-only">Close</span>

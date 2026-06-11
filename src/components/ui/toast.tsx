@@ -15,7 +15,7 @@ const variantMap = {
   success: "border-green-200 bg-green-50 text-green-800 [&_svg]:text-green-600",
   error: "border-red-200 bg-red-50 text-red-800 [&_svg]:text-red-600",
   warning: "border-amber-200 bg-amber-50 text-amber-800 [&_svg]:text-amber-600",
-  info: "border-blue-200 bg-blue-50 text-blue-800 [&_svg]:text-blue-600",
+  info: "border-brand-border bg-brand-light-bg text-brand-dark-blue [&_svg]:text-brand-dark-blue",
 };
 
 export type ToastType = "success" | "error" | "warning" | "info";
@@ -47,7 +47,7 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
         {onClose && (
           <button
             onClick={onClose}
-            className="shrink-0 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="shrink-0 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           >
             <X className="size-4" />
             <span className="sr-only">Close</span>

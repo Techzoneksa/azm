@@ -86,7 +86,7 @@ function Navbar({
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
           >
-            <div className="flex size-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+            <div className="flex size-8 items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white">
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="hidden text-start md:block">

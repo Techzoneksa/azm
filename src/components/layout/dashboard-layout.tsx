@@ -31,7 +31,7 @@ function DashboardLayout({
   return (
     <div
       className={cn(
-        "flex min-h-screen bg-gray-50",
+        "flex min-h-screen bg-brand-light-bg",
         locale === "ar" ? "font-sans" : "",
         className
       )}

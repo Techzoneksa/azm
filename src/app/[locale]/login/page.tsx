@@ -50,16 +50,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-dark-blue via-[#1a2e50] to-black p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white shadow-lg">
-            AZM
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <img
+              src="/logo.svg"
+              alt="AZM Flow"
+              className="h-14 w-auto"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl font-bold text-brand-dark-blue">
             {t("auth.welcomeBack")}
           </CardTitle>
-          <CardDescription>{t("auth.loginSubtitle")}</CardDescription>
+          <CardDescription className="text-brand-blue-gray">{t("auth.loginSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -125,13 +132,13 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="size-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="size-4 rounded border-gray-300 text-brand-orange focus:ring-brand-orange"
                 />
                 {t("auth.rememberMe")}
               </label>
               <button
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                className="text-sm text-brand-orange hover:text-brand-light-orange hover:underline"
               >
                 {t("auth.forgotPassword")}
               </button>

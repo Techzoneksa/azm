@@ -1,18 +1,35 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-orange: #F39818;
+  --color-brand-dark-blue: #203860;
+  --color-brand-light-orange: #F8C070;
+  --color-brand-blue-gray: #607088;
+  --color-brand-light-bg: #F8FAFC;
+  --color-brand-border: #E5E7EB;
+  --color-brand-gray-text: #475569;
+  --font-sans: "Droid Sans Arabic", "Segoe UI", Arial, sans-serif;
+}
+
+@font-face {
+  font-family: "Droid Sans Arabic";
+  src: local("Droid Sans Arabic");
+  font-display: swap;
+}
+
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
+  --primary: #F39818;
+  --primary-dark: #D9800A;
   --sidebar-width: 260px;
 }
 
 @layer base {
   * {
-    @apply border-gray-200;
+    @apply border-brand-border;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-brand-light-bg text-gray-900 antialiased;
   }
 }
 
