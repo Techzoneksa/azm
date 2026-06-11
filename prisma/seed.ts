@@ -43,8 +43,10 @@ async function main() {
     prisma.permission.create({ data: { name: "compliance.manage", nameAr: "إدارة التراخيص", module: "compliance" } }),
     prisma.permission.create({ data: { name: "compliance.view", nameAr: "عرض التراخيص", module: "compliance" } }),
     prisma.permission.create({ data: { name: "readiness.view", nameAr: "عرض الجاهزية", module: "readiness" } }),
+    prisma.permission.create({ data: { name: "readiness.manage", nameAr: "إدارة الجاهزية", module: "readiness" } }),
     prisma.permission.create({ data: { name: "settings.manage", nameAr: "إدارة الإعدادات", module: "settings" } }),
     prisma.permission.create({ data: { name: "reports.view", nameAr: "عرض التقارير", module: "reports" } }),
+    prisma.permission.create({ data: { name: "audit.read", nameAr: "عرض سجل المراجعة", module: "audit" } }),
   ]);
 
   const permMap = Object.fromEntries(permissions.map((p: { name: string; id: string }) => [p.name, p.id]));
@@ -65,7 +67,7 @@ async function main() {
     await prisma.rolePermission.create({ data: { roleId: superAdminRole.id, permissionId: permId } });
   }
 
-  const opsManagerPerms = ["drivers.manage", "drivers.view", "vehicles.manage", "vehicles.view", "company.manage", "company.view", "compliance.manage", "compliance.view", "readiness.view", "reports.view"];
+  const opsManagerPerms = ["drivers.manage", "drivers.view", "vehicles.manage", "vehicles.view", "company.manage", "company.view", "compliance.manage", "compliance.view", "readiness.view", "readiness.manage", "reports.view", "audit.read"];
   for (const permName of opsManagerPerms) {
     await prisma.rolePermission.create({ data: { roleId: opsManagerRole.id, permissionId: permMap[permName] } });
   }

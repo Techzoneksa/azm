@@ -1,12 +1,12 @@
 import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await requireAuth();
+    await requirePermission("readiness.view");
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "categories";
 
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await requireAuth();
+    const session = await requirePermission("readiness.manage");
     const body = await req.json();
     const { type } = body;
 
