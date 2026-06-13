@@ -40,7 +40,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { labelKey: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { labelKey: "readiness", href: "/readiness", icon: ClipboardCheck },
-  { labelKey: "companyData", href: "/company-data", icon: Building2 },
+  { labelKey: "companyData", href: "/company", icon: Building2 },
   { labelKey: "compliance", href: "/compliance", icon: ShieldCheck },
   { labelKey: "officialLinks", href: "/official-links", icon: ExternalLink },
   { labelKey: "drivers", href: "/drivers", icon: Truck },
