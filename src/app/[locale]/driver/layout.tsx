@@ -65,7 +65,7 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto min-h-screen max-w-lg bg-brand-light-bg">
       <DriverTopBar title={titleKey ? t(titleKey) : ""} onLogout={handleLogout} />
-      <main className="px-4 pb-20 pt-4">{children}</main>
+      <main className="px-4 pb-24 pt-4">{children}</main>
       <DriverBottomNav />
     </div>
   );

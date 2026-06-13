@@ -171,12 +171,12 @@ export default function PickupPointsPage() {
                           <TableCell>{point.partner?.tradingNameAr ?? "-"}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                              {t(`pickupPoints.${point.pointType}`)}
+                              {t(`pickupPoints.type_${point.pointType}`)}
                             </span>
                           </TableCell>
                           <TableCell>{point.city}</TableCell>
                           <TableCell>
-                            <StatusBadge status={point.status} />
+                            <StatusBadge status={point.status} formatLabel={(key) => t("status." + key)} />
                           </TableCell>
                           <TableCell>{point.contactPerson ?? "-"}</TableCell>
                           <TableCell>

@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
-  LayoutDashboard,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -22,7 +21,9 @@ import {
   Activity,
   ChevronRight,
   ShieldAlert,
-  CircleAlert,
+  Boxes,
+  TrendingUp,
+  UserCheck,
 } from "lucide-react";
 
 interface UserData {
@@ -78,9 +79,16 @@ function CircularProgress({ value, size = 160 }: { value: number; size?: number 
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
+  const gradientId = "circularGradient";
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#F39818" />
+            <stop offset="100%" stopColor="#F8C070" />
+          </linearGradient>
+        </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -88,24 +96,24 @@ function CircularProgress({ value, size = 160 }: { value: number; size?: number 
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-gray-200"
+          className="text-gray-100"
         />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
+          stroke={`url(#${gradientId})`}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="text-blue-600 transition-all duration-700 ease-out"
+          className="transition-all duration-700 ease-out"
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-bold text-blue-600">{Math.round(value)}%</span>
-        <span className="text-xs text-gray-500">Readiness</span>
+        <span className="text-3xl font-bold text-brand-dark-blue">{Math.round(value)}%</span>
+        <span className="text-xs text-gray-500 font-medium">Readiness</span>
       </div>
     </div>
   );
@@ -122,21 +130,27 @@ function StatCard({
   icon: React.ReactNode;
   variant?: "default" | "success" | "warning" | "destructive";
 }) {
-  const colorMap = {
-    default: "bg-blue-50 text-blue-600",
-    success: "bg-green-50 text-green-600",
-    warning: "bg-amber-50 text-amber-600",
-    destructive: "bg-red-50 text-red-600",
+  const gradientMap = {
+    default: "from-brand-dark-blue to-brand-blue-gray",
+    success: "from-brand-success to-emerald-400",
+    warning: "from-brand-warning to-amber-300",
+    destructive: "from-brand-danger to-red-400",
+  };
+  const bgMap = {
+    default: "bg-brand-dark-blue/10 text-brand-dark-blue",
+    success: "bg-brand-success/10 text-brand-success",
+    warning: "bg-brand-warning/10 text-brand-warning",
+    destructive: "bg-brand-danger/10 text-brand-danger",
   };
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="animate-fade-in">
+      <CardContent className="p-5">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="space-y-1">
             <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className="mt-1 text-3xl font-bold text-gray-900">{value}</p>
+            <p className="text-3xl font-bold text-gray-900">{value}</p>
           </div>
-          <div className={`flex size-12 items-center justify-center rounded-full ${colorMap[variant]}`}>
+          <div className={`flex size-12 items-center justify-center rounded-xl ${bgMap[variant]}`}>
             {icon}
           </div>
         </div>
@@ -147,11 +161,12 @@ function StatCard({
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-6 animate-fade-in">
+      <Skeleton variant="rectangular" className="h-32 w-full" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
-            <CardContent className="p-6">
+            <CardContent className="p-5">
               <Skeleton variant="text" className="mb-2 h-4 w-24" />
               <Skeleton variant="text" className="h-8 w-16" />
             </CardContent>
@@ -167,7 +182,7 @@ function LoadingSkeleton() {
             <CardContent>
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} variant="text" className="h-10" />
+                  <Skeleton key={i} variant="rectangular" className="h-12 w-full" />
                 ))}
               </div>
             </CardContent>
@@ -180,7 +195,7 @@ function LoadingSkeleton() {
           <CardContent>
             <div className="space-y-3">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} variant="text" className="h-12" />
+                <Skeleton key={i} variant="rectangular" className="h-16 w-full" />
               ))}
             </div>
           </CardContent>
@@ -233,7 +248,6 @@ export default function DashboardPage() {
 
       let totalScore = 0;
       let completed = 0;
-      const inProgress = 0;
       let missing = 0;
       let totalItems = 0;
 
@@ -243,14 +257,13 @@ export default function DashboardPage() {
         completed += catCompleted;
         missing += items.filter((i) => !i.isCompleted).length;
         totalItems += items.length;
-
         const weight = cat.weight || 0;
         const catScore = items.length > 0 ? (catCompleted / items.length) * 100 : 0;
         totalScore += catScore * weight;
       }
       const overallScore = Math.round(totalScore);
       setReadinessScore(overallScore);
-      setStats({ completedActions: completed, inProgress: inProgress, missingActions: missing, totalActions: totalItems });
+      setStats({ completedActions: completed, inProgress: 0, missingActions: missing, totalActions: totalItems });
 
       if (driversRes.ok) {
         const driversJson: DriverData = await driversRes.json();
@@ -314,60 +327,45 @@ export default function DashboardPage() {
         <LoadingSkeleton />
       ) : (
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {t("dashboard.welcome") || "Welcome back"}{user ? `, ${user.fullName}` : ""}
-              </h1>
-              <p className="text-sm text-gray-500">
-                {t("dashboard.overview") || "Here is your operations overview"}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={fetchData}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                <RefreshCw className="size-4" />
-                {t("common.refresh") || "Refresh"}
-              </button>
-            </div>
-          </div>
-
-          {/* Readiness Score */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center gap-6 md:flex-row md:gap-10">
-                <CircularProgress value={readinessScore} />
-                <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {t("readiness.overallScore") || "Overall Readiness Score"}
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {t("readiness.basedOnCategories") || "Based on all readiness categories"}
+          {/* Hero Welcome Section */}
+          <Card className="overflow-hidden border-0 animate-fade-in">
+            <div className="gradient-brand p-6 md:p-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-white">
+                    {t("dashboard.welcome") || "Welcome back"}{user ? `, ${user.fullName}` : ""}
+                  </h1>
+                  <p className="mt-1 text-white/70 text-sm">
+                    {t("dashboard.overview") || "Here is your operations overview"}
                   </p>
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div className="rounded-lg bg-gray-50 p-3 text-center">
-                      <p className="text-xs text-gray-500">{t("readiness.completed") || "Completed"}</p>
-                      <p className="mt-1 text-xl font-bold text-green-600">{stats.completedActions}</p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-3 text-center">
-                      <p className="text-xs text-gray-500">{t("readiness.missing") || "Missing"}</p>
-                      <p className="mt-1 text-xl font-bold text-red-600">{stats.missingActions}</p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-3 text-center">
-                      <p className="text-xs text-gray-500">{t("readiness.total") || "Total Items"}</p>
-                      <p className="mt-1 text-xl font-bold text-gray-900">{stats.totalActions}</p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-3 text-center">
-                      <p className="text-xs text-gray-500">{t("readiness.categories") || "Categories"}</p>
-                      <p className="mt-1 text-xl font-bold text-blue-600">{readinessData.length}</p>
-                    </div>
-                  </div>
+                </div>
+                <button
+                  onClick={fetchData}
+                  className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/25"
+                >
+                  <RefreshCw className="size-4" />
+                  {t("common.refresh") || "Refresh"}
+                </button>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
+                  <p className="text-xs text-white/70">{t("readiness.completed") || "Completed"}</p>
+                  <p className="mt-1 text-xl font-bold text-white">{stats.completedActions}</p>
+                </div>
+                <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
+                  <p className="text-xs text-white/70">{t("readiness.missing") || "Missing"}</p>
+                  <p className="mt-1 text-xl font-bold text-amber-300">{stats.missingActions}</p>
+                </div>
+                <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
+                  <p className="text-xs text-white/70">{t("readiness.total") || "Total Items"}</p>
+                  <p className="mt-1 text-xl font-bold text-white">{stats.totalActions}</p>
+                </div>
+                <div className="rounded-xl bg-white/10 p-3 text-center backdrop-blur-sm">
+                  <p className="text-xs text-white/70">{t("readiness.categories") || "Categories"}</p>
+                  <p className="mt-1 text-xl font-bold text-white">{readinessData.length}</p>
                 </div>
               </div>
-            </CardContent>
+            </div>
           </Card>
 
           {/* Stat Cards */}
@@ -379,12 +377,6 @@ export default function DashboardPage() {
               variant="success"
             />
             <StatCard
-              title={t("dashboard.inProgress") || "In Progress"}
-              value={stats.inProgress}
-              icon={<Clock className="size-6" />}
-              variant="warning"
-            />
-            <StatCard
               title={t("dashboard.missingActions") || "Missing Actions"}
               value={stats.missingActions}
               icon={<AlertTriangle className="size-6" />}
@@ -393,80 +385,111 @@ export default function DashboardPage() {
             <StatCard
               title={t("dashboard.totalItems") || "Total Items"}
               value={stats.totalActions}
-              icon={<LayoutDashboard className="size-6" />}
+              icon={<Boxes className="size-6" />}
               variant="default"
+            />
+            <StatCard
+              title={t("readiness.overallScore") || "Readiness"}
+              value={readinessScore}
+              icon={<TrendingUp className="size-6" />}
+              variant={readinessScore >= 80 ? "success" : readinessScore >= 50 ? "warning" : "destructive"}
             />
           </div>
 
-          {/* Driver & Vehicle Stats + Expiring Docs */}
+          {/* Readiness + Driver/Vehicle + Expiring Docs */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Users className="size-5 text-blue-600" />
-                  <CardTitle>{t("dashboard.driverStats") || "Driver Readiness"}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {driverTotal > 0 ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">{t("dashboard.ready") || "Ready"}</span>
-                      <span className="text-sm font-medium text-green-600">{driverReady} / {driverTotal}</span>
-                    </div>
-                    <Progress value={(driverReady / driverTotal) * 100} variant="success" size="lg" />
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{t("dashboard.incomplete") || "Incomplete"}</span>
-                      <span className="font-medium text-amber-600">{driverTotal - driverReady}</span>
-                    </div>
+            {/* Readiness Score */}
+            <Card className="animate-slide-in">
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center gap-4">
+                  <CircularProgress value={readinessScore} />
+                  <div className="text-center">
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {t("readiness.overallScore") || "Overall Readiness Score"}
+                    </h3>
+                    <p className="mt-0.5 text-sm text-gray-500">
+                      {t("readiness.basedOnCategories") || "Based on all readiness categories"}
+                    </p>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-400">{t("dashboard.noDrivers") || "No drivers registered"}</p>
-                )}
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Truck className="size-5 text-blue-600" />
-                  <CardTitle>{t("dashboard.vehicleStats") || "Vehicle Readiness"}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {vehicleTotal > 0 ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">{t("dashboard.ready") || "Ready"}</span>
-                      <span className="text-sm font-medium text-green-600">{vehicleReady} / {vehicleTotal}</span>
+            {/* Driver & Vehicle Readiness */}
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-brand-success/10 text-brand-success">
+                      <Users className="size-5" />
                     </div>
-                    <Progress value={(vehicleReady / vehicleTotal) * 100} variant="success" size="lg" />
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{t("dashboard.incomplete") || "Incomplete"}</span>
-                      <span className="font-medium text-amber-600">{vehicleTotal - vehicleReady}</span>
+                    <div>
+                      <CardTitle className="text-sm">{t("dashboard.driverStats") || "Driver Readiness"}</CardTitle>
                     </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-400">{t("dashboard.noVehicles") || "No vehicles registered"}</p>
-                )}
-              </CardContent>
-            </Card>
+                  {driverTotal > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">{t("dashboard.ready") || "Ready"}</span>
+                        <span className="font-semibold text-gray-900">{driverReady} / {driverTotal}</span>
+                      </div>
+                      <Progress value={(driverReady / driverTotal) * 100} variant="gradient" size="md" />
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">{t("dashboard.incomplete") || "Incomplete"}</span>
+                        <span className="font-medium text-amber-600">{driverTotal - driverReady}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">{t("dashboard.noDrivers") || "No drivers registered"}</p>
+                  )}
+                </CardContent>
+              </Card>
 
+              <Card>
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-brand-info/10 text-brand-info">
+                      <Truck className="size-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">{t("dashboard.vehicleStats") || "Vehicle Readiness"}</CardTitle>
+                    </div>
+                  </div>
+                  {vehicleTotal > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">{t("dashboard.ready") || "Ready"}</span>
+                        <span className="font-semibold text-gray-900">{vehicleReady} / {vehicleTotal}</span>
+                      </div>
+                      <Progress value={(vehicleReady / vehicleTotal) * 100} variant="gradient" size="md" />
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">{t("dashboard.incomplete") || "Incomplete"}</span>
+                        <span className="font-medium text-amber-600">{vehicleTotal - vehicleReady}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">{t("dashboard.noVehicles") || "No vehicles registered"}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Expiring Documents */}
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <FileWarning className="size-5 text-amber-600" />
-                  <CardTitle>{t("dashboard.expiringDocuments") || "Expiring Documents"}</CardTitle>
-                  <CardDescription>
-                    {t("dashboard.next30Days") || "Next 30 days"}
-                  </CardDescription>
+                  <FileWarning className="size-5 text-amber-500" />
+                  <div>
+                    <CardTitle className="text-sm">{t("dashboard.expiringDocuments") || "Expiring Documents"}</CardTitle>
+                    <CardDescription>{t("dashboard.next30Days") || "Next 30 days"}</CardDescription>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
                 {expiringDocs.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {expiringDocs.slice(0, 5).map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-2">
+                      <div key={doc.id} className="flex items-center justify-between rounded-lg bg-amber-50/50 p-3 border border-amber-100/50">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-gray-900">
                             {doc.entity ? (isRtl ? doc.entity.nameAr : doc.entity.name) : doc.type}
@@ -475,14 +498,17 @@ export default function DashboardPage() {
                             {new Date(doc.expiryDate).toLocaleDateString(isRtl ? "ar-SA" : "en-US")}
                           </p>
                         </div>
-                        <Badge variant="warning" className="ms-2 shrink-0">
+                        <Badge variant="warning" className="ms-2 shrink-0 text-xs">
                           {Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}d
                         </Badge>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">{t("dashboard.noExpiringDocs") || "No documents expiring soon"}</p>
+                  <div className="flex flex-col items-center gap-2 py-6 text-center">
+                    <CheckCircle2 className="size-8 text-green-400" />
+                    <p className="text-sm text-gray-400">{t("dashboard.noExpiringDocs") || "No documents expiring soon"}</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -493,13 +519,15 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <ListChecks className="size-5 text-blue-600" />
-                  <CardTitle>{t("dashboard.currentPriorities") || "Current Priorities"}</CardTitle>
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-brand-warning/10 text-brand-warning">
+                    <ListChecks className="size-4" />
+                  </div>
+                  <CardTitle className="text-sm">{t("dashboard.currentPriorities") || "Current Priorities"}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 {readinessData.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {readinessData
                       .filter((cat) => {
                         const items = cat.items || [];
@@ -512,24 +540,29 @@ export default function DashboardPage() {
                         const completed = items.filter((i) => i.isCompleted).length;
                         const pct = Math.round((completed / items.length) * 100);
                         return (
-                          <div key={cat.id} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
-                            <CircleAlert className="size-5 shrink-0 text-amber-500" />
+                          <div key={cat.id} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/30 p-3 transition-colors hover:bg-gray-50">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                              <AlertTriangle className="size-4" />
+                            </div>
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-medium text-gray-900">
                                 {isRtl ? cat.nameAr : cat.name}
                               </p>
-                              <div className="mt-1 flex items-center gap-2">
-                                <Progress value={pct} size="sm" className="flex-1" />
-                                <span className="text-xs text-gray-500">{completed}/{items.length}</span>
+                              <div className="mt-1.5 flex items-center gap-2">
+                                <Progress value={pct} size="sm" className="flex-1" variant="warning" />
+                                <span className="text-xs text-gray-500 font-medium">{pct}%</span>
                               </div>
                             </div>
-                            <ChevronRight className="size-4 shrink-0 text-gray-400" />
+                            <ChevronRight className="size-4 shrink-0 text-gray-300" />
                           </div>
                         );
                       })}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">{t("dashboard.noPriorities") || "All categories are complete"}</p>
+                  <div className="flex flex-col items-center gap-2 py-6 text-center">
+                    <CheckCircle2 className="size-8 text-green-400" />
+                    <p className="text-sm text-gray-400">{t("dashboard.noPriorities") || "All categories are complete"}</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -537,22 +570,34 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Activity className="size-5 text-blue-600" />
-                  <CardTitle>{t("dashboard.recentUpdates") || "Recent Updates"}</CardTitle>
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-brand-info/10 text-brand-info">
+                    <Activity className="size-4" />
+                  </div>
+                  <CardTitle className="text-sm">{t("dashboard.recentUpdates") || "Recent Updates"}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 {recentUpdates.length > 0 ? (
-                  <div className="space-y-2">
-                    {recentUpdates.slice(0, 8).map((log) => (
-                      <div key={log.id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2">
+                  <div className="space-y-1">
+                    {recentUpdates.slice(0, 8).map((log, idx) => (
+                      <div key={log.id} className="relative flex items-start gap-3 px-3 py-2.5">
+                        {idx < recentUpdates.slice(0, 8).length - 1 && (
+                          <div className="absolute start-6 top-8 bottom-0 w-px bg-gray-200" />
+                        )}
+                        <div className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                          idx === 0 ? "border-brand-orange bg-brand-orange/10" : "border-gray-300 bg-white"
+                        }`}>
+                          <div className={`size-2 rounded-full ${
+                            idx === 0 ? "bg-brand-orange" : "bg-gray-300"
+                          }`} />
+                        </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm text-gray-900">
+                          <p className="text-sm text-gray-900">
                             <span className="font-medium">{log.user?.fullName || "System"}</span>
                             <span className="text-gray-500"> {log.action.toLowerCase()} </span>
                             <span className="text-gray-700">{log.entityType}</span>
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 mt-0.5">
                             {new Date(log.createdAt).toLocaleDateString(isRtl ? "ar-SA" : "en-US", {
                               day: "numeric",
                               month: "short",
@@ -561,12 +606,14 @@ export default function DashboardPage() {
                             })}
                           </p>
                         </div>
-                        <StatusBadge status={log.action} className="ms-2 shrink-0" />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">{t("dashboard.noUpdates") || "No recent updates"}</p>
+                  <div className="flex flex-col items-center gap-2 py-6 text-center">
+                    <Activity className="size-8 text-gray-300" />
+                    <p className="text-sm text-gray-400">{t("dashboard.noUpdates") || "No recent updates"}</p>
+                  </div>
                 )}
               </CardContent>
             </Card>

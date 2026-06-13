@@ -187,9 +187,9 @@ export default function DispatchPage() {
     if (!dateStr) return "";
     const diff = Date.now() - new Date(dateStr).getTime();
     const hours = Math.floor(diff / 3600000);
-    if (hours < 1) return `${Math.floor(diff / 60000)}m`;
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}d`;
+    if (hours < 1) return `${Math.floor(diff / 60000)}${tCommon("minuteAbbr")}`;
+    if (hours < 24) return `${hours}${tCommon("hourAbbr")}`;
+    return `${Math.floor(hours / 24)}${tCommon("dayAbbr")}`;
   };
 
   return (
@@ -235,7 +235,7 @@ export default function DispatchPage() {
 
         {selected.size > 0 && (
           <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2">
-            <span className="text-sm text-blue-700">{selected.size} selected</span>
+            <span className="text-sm text-blue-700">{selected.size} {tCommon("selected")}</span>
             <Button variant="outline" size="sm" onClick={() => { setAssignDialogOpen(true); }}>
               <Truck className="size-3" />
               {t("bulkAssign")}
@@ -317,7 +317,7 @@ export default function DispatchPage() {
                     </Card>
                   ))}
                   {col.shipments.length > 10 && (
-                    <p className="text-center text-xs text-gray-400">+{col.shipments.length - 10} more</p>
+                    <p className="text-center text-xs text-gray-400">+{col.shipments.length - 10} {tCommon("more")}</p>
                   )}
                 </div>
               </div>

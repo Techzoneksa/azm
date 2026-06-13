@@ -247,7 +247,7 @@ export default function ShipmentsPage() {
             </div>
             {selected.size > 0 && (
               <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                <span className="text-sm text-gray-600">{selected.size} selected</span>
+                <span className="text-sm text-gray-600">{selected.size} {tCommon("selected")}</span>
                 <Button variant="outline" size="sm" onClick={() => handleBulkAction("status")}>
                   <Flag className="size-3" />
                   {t("bulkStatusChange")}

@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
+    <div className="relative w-full overflow-auto rounded-xl border border-gray-200/80 bg-white shadow-card">
       <table
         ref={ref}
         className={cn("w-full caption-bottom text-sm", className)}
@@ -16,7 +16,7 @@ Table.displayName = "Table";
 
 const TableHeader = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn("[&_tr]:border-b border-gray-200", className)} {...props} />
+    <thead ref={ref} className={cn("bg-gray-50/80 [&_tr]:border-b border-gray-200", className)} {...props} />
   )
 );
 TableHeader.displayName = "TableHeader";
@@ -37,7 +37,7 @@ const TableRow = forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTableRowElem
     <tr
       ref={ref}
       className={cn(
-        "border-b border-gray-200 transition-colors hover:bg-gray-50/50 data-[state=selected]:bg-gray-100",
+        "border-b border-gray-100 transition-colors hover:bg-gray-50/60 data-[state=selected]:bg-gray-100",
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCel
     <th
       ref={ref}
       className={cn(
-        "h-12 px-4 text-start align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pe-0",
+        "h-11 px-4 text-start align-middle text-xs font-semibold text-gray-500 uppercase tracking-wider [&:has([role=checkbox])]:pe-0",
         className
       )}
       {...props}

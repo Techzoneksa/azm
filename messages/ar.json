@@ -47,6 +47,10 @@
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
+  "navbar": {
+    "menuToggle": "فتح القائمة",
+    "logout": "تسجيل الخروج"
+  },
   "common": {
     "save": "حفظ",
     "cancel": "إلغاء",
@@ -81,7 +85,20 @@
     "select": "اختر",
     "retry": "إعادة المحاولة",
     "update": "تحديث",
-    "view": "عرض"
+    "view": "عرض",
+    "allStatuses": "جميع الحالات",
+    "allTypes": "جميع الأنواع",
+    "employee": "موظف",
+    "contractor": "متعاقد",
+    "owner": "مالك",
+    "owned": "مملوكة",
+    "leased": "مؤجرة",
+    "rented": "مستأجرة",
+    "selected": "محدد",
+    "more": "المزيد",
+    "minuteAbbr": "د",
+    "hourAbbr": "س",
+    "dayAbbr": "ي"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -368,7 +385,9 @@
     "missing": "مفقود",
     "verified": "موثق",
     "under_review": "قيد المراجعة",
-    "expiring_soon": "شبه منتهي"
+    "expiring_soon": "شبه منتهي",
+    "ended": "منهي",
+    "submitted": "مقدم"
   },
   "document": {
     "national_id": "الهوية أو الإقامة",

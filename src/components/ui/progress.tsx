@@ -5,7 +5,7 @@ export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
   value?: number;
   max?: number;
   size?: "sm" | "md" | "lg";
-  variant?: "default" | "success" | "warning" | "danger";
+  variant?: "default" | "success" | "warning" | "danger" | "gradient";
   showLabel?: boolean;
 }
 
@@ -17,22 +17,15 @@ const sizeMap = {
 
 const variantMap = {
   default: "bg-brand-orange",
-  success: "bg-green-600",
-  warning: "bg-amber-500",
-  danger: "bg-red-600",
+  success: "bg-brand-success",
+  warning: "bg-brand-warning",
+  danger: "bg-brand-danger",
+  gradient: "bg-gradient-to-r from-brand-orange to-brand-light-orange",
 };
 
 const Progress = forwardRef<HTMLDivElement, ProgressProps>(
   (
-    {
-      className,
-      value = 0,
-      max = 100,
-      size = "md",
-      variant = "default",
-      showLabel = false,
-      ...props
-    },
+    { className, value = 0, max = 100, size = "md", variant = "default", showLabel = false, ...props },
     ref
   ) => {
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
@@ -44,21 +37,18 @@ const Progress = forwardRef<HTMLDivElement, ProgressProps>(
           aria-valuenow={value}
           aria-valuemin={0}
           aria-valuemax={max}
-          className={cn(
-            "w-full overflow-hidden rounded-full bg-gray-200",
-            sizeMap[size]
-          )}
+          className={cn("w-full overflow-hidden rounded-full bg-gray-100", sizeMap[size])}
         >
           <div
             className={cn(
-              "h-full rounded-full transition-all duration-300 ease-in-out",
+              "h-full rounded-full transition-all duration-500 ease-out",
               variantMap[variant]
             )}
             style={{ width: `${percentage}%` }}
           />
         </div>
         {showLabel && (
-          <span className="mt-1 block text-xs text-gray-500">
+          <span className="mt-1.5 block text-xs font-medium text-gray-500">
             {Math.round(percentage)}%
           </span>
         )}

@@ -9,10 +9,10 @@ function Skeleton({ className, variant = "text", ...props }: SkeletonProps) {
   return (
     <div
       className={cn(
-        "animate-pulse bg-gray-200",
+        "animate-shimmer rounded",
         variant === "circular" && "rounded-full",
-        variant === "rectangular" && "rounded-md",
-        variant === "text" && "h-4 w-full rounded",
+        variant === "rectangular" && "rounded-lg",
+        variant === "text" && "h-4 w-full",
         className
       )}
       {...props}

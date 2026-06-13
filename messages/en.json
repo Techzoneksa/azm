@@ -47,6 +47,10 @@
     "settings": "Settings",
     "logout": "Logout"
   },
+  "navbar": {
+    "menuToggle": "Toggle menu",
+    "logout": "Logout"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -81,7 +85,20 @@
     "select": "Select",
     "retry": "Retry",
     "update": "Update",
-    "view": "View"
+    "view": "View",
+    "allStatuses": "All Statuses",
+    "allTypes": "All Types",
+    "employee": "Employee",
+    "contractor": "Contractor",
+    "owner": "Owner",
+    "owned": "Owned",
+    "leased": "Leased",
+    "rented": "Rented",
+    "selected": "selected",
+    "more": "more",
+    "minuteAbbr": "m",
+    "hourAbbr": "h",
+    "dayAbbr": "d"
   },
   "auth": {
     "login": "Sign In",
@@ -368,7 +385,9 @@
     "missing": "Missing",
     "verified": "Verified",
     "under_review": "Under Review",
-    "expiring_soon": "Expiring Soon"
+    "expiring_soon": "Expiring Soon",
+    "ended": "Ended",
+    "submitted": "Submitted"
   },
   "document": {
     "national_id": "National ID / Iqama",

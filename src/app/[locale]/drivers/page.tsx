@@ -153,10 +153,10 @@ export default function DriversPage() {
                           <TableCell>{driver.nationalId}</TableCell>
                           <TableCell>{driver.city}</TableCell>
                           <TableCell>
-                            <StatusBadge status={driver.status} />
+                            <StatusBadge status={driver.status} formatLabel={(key) => t("drivers.status_" + key)} />
                           </TableCell>
                           <TableCell>
-                            <StatusBadge status={driver.readinessStatus} />
+                            <StatusBadge status={driver.readinessStatus} formatLabel={(key) => t("drivers.readiness_" + key)} />
                           </TableCell>
                           <TableCell>{driver.documentsCount ?? 0}</TableCell>
                           <TableCell>

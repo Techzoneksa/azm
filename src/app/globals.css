@@ -8,19 +8,27 @@
   --color-brand-light-bg: #F8FAFC;
   --color-brand-border: #E5E7EB;
   --color-brand-gray-text: #475569;
-  --font-sans: "Droid Sans Arabic", "Segoe UI", Arial, sans-serif;
+  --color-brand-success: #10B981;
+  --color-brand-warning: #F59E0B;
+  --color-brand-danger: #EF4444;
+  --color-brand-info: #3B82F6;
+
+  --font-sans: "Droid Sans Arabic", "Cairo", "Segoe UI", Arial, sans-serif;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-card-hover: 0 4px 12px 0 rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-dropdown: 0 8px 24px 0 rgb(0 0 0 / 0.08);
+  --shadow-modal: 0 20px 60px 0 rgb(0 0 0 / 0.12);
+  --shadow-sidebar: 4px 0 20px 0 rgb(0 0 0 / 0.06);
+  --radius-card: 0.75rem;
+  --radius-button: 0.5rem;
+  --radius-badge: 9999px;
 }
 
 @font-face {
   font-family: "Droid Sans Arabic";
-  src: local("Droid Sans Arabic");
+  src: local("Droid Sans Arabic"), local("Droid Arabic Naskh"), local("Cairo");
   font-display: swap;
-}
-
-:root {
-  --primary: #F39818;
-  --primary-dark: #D9800A;
-  --sidebar-width: 260px;
 }
 
 @layer base {
@@ -30,6 +38,39 @@
 
   body {
     @apply bg-brand-light-bg text-gray-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-orange/20 text-brand-dark-blue;
+  }
+}
+
+@layer utilities {
+  .gradient-brand {
+    background: linear-gradient(135deg, #203860 0%, #2a4a7a 100%);
+  }
+
+  .gradient-orange {
+    background: linear-gradient(135deg, #F39818 0%, #F8C070 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+  }
+
+  .gradient-card-accent {
+    border-top: 3px solid;
+    @apply border-brand-orange;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #F39818, #F8C070);
+  }
+
+  .text-gradient-blue {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #203860, #3B82F6);
   }
 }
 
@@ -48,4 +89,51 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }

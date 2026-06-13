@@ -29,7 +29,6 @@ import {
   ArrowLeftRight,
   BarChart3,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface NavItem {
   labelKey: string;
@@ -90,26 +89,24 @@ function Sidebar({
   const sidebarContent = (
     <div
       className={cn(
-        "flex h-full flex-col bg-brand-dark-blue text-white",
+        "flex h-full flex-col gradient-brand",
         className
       )}
       {...props}
     >
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-        <img
-          src="/logo.svg"
-          alt="AZM Flow"
-          className="h-8 w-auto"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
-        />
-        <span className="text-lg font-bold tracking-tight">AZM Flow</span>
+        <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-orange to-brand-light-orange text-white text-xs font-bold shadow-sm">
+          A
+        </div>
+        <div className="flex flex-col">
+          <span className="text-base font-bold tracking-tight text-white">AZM Flow</span>
+          <span className="text-[10px] text-white/50 font-medium">Logistics OS</span>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -121,21 +118,16 @@ function Sidebar({
                 setMobileOpen(false);
               }}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-brand-orange text-white"
-                  : "text-gray-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-gradient-to-r from-brand-orange to-brand-light-orange text-white shadow-sm"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
               )}
             >
-              <Icon className="size-5 shrink-0" />
+              <Icon className={cn("size-5 shrink-0", active && "drop-shadow-sm")} />
               <span>{t(item.labelKey)}</span>
               {active && (
-                <ChevronLeft
-                  className={cn(
-                    "ms-auto size-4",
-                    isRtl && "rotate-180"
-                  )}
-                />
+                <div className={cn("ms-auto size-1.5 rounded-full bg-white", isRtl && "me-auto ms-0")} />
               )}
             </button>
           );
@@ -143,11 +135,11 @@ function Sidebar({
       </nav>
 
       {/* Bottom Section */}
-      <div className="border-t border-white/10 p-3 space-y-2">
+      <div className="border-t border-white/10 p-3 space-y-1">
         {/* Language Switch */}
         <button
           onClick={onToggleLanguage}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Globe className="size-5 shrink-0" />
           <span>{isRtl ? "English" : "العربية"}</span>
@@ -156,7 +148,7 @@ function Sidebar({
         {/* Logout */}
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 transition-colors hover:bg-red-600/20 hover:text-red-400"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-red-500/20 hover:text-red-300"
         >
           <LogOut className="size-5 shrink-0" />
           <span>{t("logout")}</span>
@@ -170,8 +162,8 @@ function Sidebar({
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed start-4 top-3 z-50 flex size-10 items-center justify-center rounded-lg bg-brand-dark-blue text-white shadow-lg md:hidden"
-        aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        className="fixed start-4 top-3 z-50 flex size-10 items-center justify-center rounded-xl bg-white text-brand-dark-blue shadow-lg ring-1 ring-gray-200 md:hidden"
+        aria-label="Toggle menu"
       >
         {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
@@ -179,7 +171,7 @@ function Sidebar({
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden animate-fade-in"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -187,8 +179,12 @@ function Sidebar({
       {/* Mobile sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 start-0 z-50 w-64 transform transition-transform duration-200 ease-in-out md:hidden",
-          mobileOpen ? "translate-x-0" : isRtl ? "translate-x-full" : "-translate-x-full"
+          "fixed inset-y-0 z-50 w-64 shadow-sidebar transition-transform duration-300 ease-out md:hidden",
+          mobileOpen
+            ? "translate-x-0"
+            : isRtl
+              ? "translate-x-full"
+              : "-translate-x-full"
         )}
       >
         {sidebarContent}
@@ -196,7 +192,7 @@ function Sidebar({
 
       {/* Desktop sidebar */}
       <aside className="hidden md:block md:w-64 md:shrink-0">
-        <div className="fixed inset-y-0 start-0 z-30 w-64">{sidebarContent}</div>
+        <div className="fixed inset-y-0 z-30 w-64 shadow-sidebar">{sidebarContent}</div>
       </aside>
     </>
   );

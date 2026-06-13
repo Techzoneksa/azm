@@ -111,10 +111,10 @@ export default function DriverShipmentsPage() {
             <Link
               key={f.key}
               href={href}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-brand-dark-blue text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "gradient-brand text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800"
               }`}
             >
               {t(f.labelKey)}
@@ -183,7 +183,7 @@ export default function DriverShipmentsPage() {
                         {s.priority !== "NORMAL" && (
                           <span className={`flex items-center gap-1 font-medium ${priorityColors[s.priority] || ""}`}>
                             <ArrowUp className="size-3" />
-                            {s.priority}
+                            {tShip("priority_" + s.priority.toLowerCase())}
                           </span>
                         )}
                       </div>

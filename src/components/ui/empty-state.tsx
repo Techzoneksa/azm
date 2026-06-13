@@ -14,28 +14,23 @@ export interface EmptyStateProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 function EmptyState({
-  className,
-  icon,
-  title,
-  description,
-  action,
-  ...props
+  className, icon, title, description, action, ...props
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-4 py-16 text-center",
+        "flex flex-col items-center justify-center gap-5 py-20 text-center animate-fade-in",
         className
       )}
       {...props}
     >
-      <div className="flex size-16 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-        {icon ?? <Inbox className="size-8" />}
+      <div className="flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-orange/10 to-brand-light-orange/20 text-brand-orange">
+        {icon ?? <Inbox className="size-10" />}
       </div>
-      <div className="max-w-sm space-y-1">
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+      <div className="max-w-sm space-y-1.5">
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         {description && (
-          <p className="text-sm text-gray-500">{description}</p>
+          <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
         )}
       </div>
       {action && (
