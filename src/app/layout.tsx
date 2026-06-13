@@ -1,10 +1,18 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AZM Flow - نظام إدارة وتشغيل التوصيل",
   description: "نظام إدارة وتشغيل شركة عزم للخدمات اللوجستية",
-  icons: { icon: "/favicon.ico" },
+  manifest: "/manifest.json",
+  icons: { icon: "/favicon.ico", apple: "/logo.svg" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#203860",
 };
 
 export default function RootLayout({

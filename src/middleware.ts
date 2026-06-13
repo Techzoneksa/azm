@@ -6,17 +6,14 @@ import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedPaths = [
-  "/dashboard",
-  "/readiness",
-  "/company",
-  "/compliance",
-  "/official-links",
-  "/drivers",
-  "/vehicles",
-  "/users",
-  "/settings",
+const adminPaths = [
+  "/dashboard", "/readiness", "/company", "/compliance",
+  "/official-links", "/drivers", "/vehicles", "/users", "/settings",
+  "/partners", "/contracts", "/pickup-points", "/coverage-areas",
+  "/shipments", "/dispatch", "/returns", "/reports",
 ];
+
+const driverPaths = ["/driver"];
 
 const publicPaths = ["/login"];
 
@@ -24,12 +21,35 @@ const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "azm-flow-secret"
 );
 
+interface JwtPayload {
+  id: string;
+  email: string;
+  fullName: string;
+  roles: string[];
+  permissions: string[];
+}
+
+async function verifySession(
+  cookie: string | undefined
+): Promise<JwtPayload | null> {
+  if (!cookie) return null;
+  try {
+    const { payload } = await jwtVerify(cookie, SECRET);
+    return payload as unknown as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const pathWithoutLocale = pathname.replace(/^\/(ar|en)/, "") || "/";
 
-  const isProtected = protectedPaths.some(
+  const isAdminPath = adminPaths.some(
+    (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(p + "/")
+  );
+  const isDriverPath = driverPaths.some(
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(p + "/")
   );
   const isPublic = publicPaths.some(
@@ -58,27 +78,43 @@ export async function middleware(request: NextRequest) {
   }
 
   const sessionCookie = request.cookies.get("session")?.value;
-  let isAuthenticated = false;
+  const session = await verifySession(sessionCookie);
+  const isAuthenticated = session !== null;
+  const isDriver = session?.roles?.includes("DRIVER") ?? false;
 
-  if (sessionCookie) {
-    try {
-      await jwtVerify(sessionCookie, SECRET);
-      isAuthenticated = true;
-    } catch {
-      isAuthenticated = false;
-    }
+  // Redirect DRIVER away from admin paths
+  if (isDriver && isAdminPath) {
+    const locale = pathname.match(/^\/(ar|en)/)?.[1] || "ar";
+    return NextResponse.redirect(new URL(`/${locale}/driver`, request.url));
   }
 
-  if (isProtected && !isAuthenticated) {
+  // Redirect non-DRIVER away from driver paths
+  if (isDriverPath && isAuthenticated && !isDriver) {
+    const locale = pathname.match(/^\/(ar|en)/)?.[1] || "ar";
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // Require auth for admin paths
+  if (isAdminPath && !isAuthenticated) {
     const locale = pathname.match(/^\/(ar|en)/)?.[1] || "ar";
     const loginUrl = new URL(`/${locale}/login`, request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  // Require auth for driver paths
+  if (isDriverPath && !isAuthenticated) {
+    const locale = pathname.match(/^\/(ar|en)/)?.[1] || "ar";
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect authenticated users from /login based on role
   if (isPublic && isAuthenticated && pathWithoutLocale === "/login") {
     const locale = pathname.match(/^\/(ar|en)/)?.[1] || "ar";
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    const target = isDriver ? "driver" : "dashboard";
+    return NextResponse.redirect(new URL(`/${locale}/${target}`, request.url));
   }
 
   return intlMiddleware(request);

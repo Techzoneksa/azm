@@ -11,6 +11,8 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Seeding AZM Flow database...");
 
+  await prisma.fieldActivityLog.deleteMany();
+  await prisma.driverShift.deleteMany();
   await prisma.shipmentReturn.deleteMany();
   await prisma.proofOfDelivery.deleteMany();
   await prisma.deliveryAttempt.deleteMany();
@@ -122,6 +124,38 @@ async function main() {
   }
 
   const passwordHash = await bcrypt.hash("Admin@123", 10);
+
+  // DRIVER permissions
+  const driverPerms = [
+    { name: "driver_app.access", nameAr: "الدخول إلى تطبيق المندوب", module: "driver" },
+    { name: "driver_shipments.view", nameAr: "عرض شحنات المندوب", module: "driver" },
+    { name: "driver_shipments.update_status", nameAr: "تحديث حالة الشحنات", module: "driver" },
+    { name: "driver_attempts.create", nameAr: "تسجيل محاولة تسليم", module: "driver" },
+    { name: "driver_pod.create", nameAr: "إثبات التسليم", module: "driver" },
+    { name: "driver_returns.view", nameAr: "عرض المرتجعات", module: "driver" },
+    { name: "driver_returns.update", nameAr: "تحديث المرتجعات", module: "driver" },
+    { name: "driver_shift.manage", nameAr: "إدارة الوردية", module: "driver" },
+    { name: "driver_profile.view", nameAr: "عرض الملف الشخصي", module: "driver" },
+  ];
+
+  for (const dp of driverPerms) {
+    await prisma.permission.create({ data: dp });
+  }
+
+  // Refresh permMap with driver permissions
+  const allPermissions = await prisma.permission.findMany();
+  for (const p of allPermissions) {
+    permMap[p.name] = p.id;
+  }
+
+  const driverRole = await prisma.role.create({
+    data: { name: "DRIVER", nameAr: "مندوب توصيل", description: "صلاحيات تطبيق المندوب", isSystem: true },
+  });
+
+  const driverPermNames = driverPerms.map((dp) => dp.name);
+  for (const permName of driverPermNames) {
+    await prisma.rolePermission.create({ data: { roleId: driverRole.id, permissionId: permMap[permName] } });
+  }
 
   const adminUser = await prisma.user.create({
     data: {
@@ -307,6 +341,19 @@ async function main() {
       notes: "ممتاز في التوصيل",
     },
   });
+
+  // Driver user linked to driver1
+  const driverUser = await prisma.user.create({
+    data: {
+      email: "driver@azmflow.com",
+      passwordHash,
+      fullName: "خالد الحربي",
+      phone: "0555000001",
+      isActive: true,
+      driverId: driver1.id,
+    },
+  });
+  await prisma.userRole.create({ data: { userId: driverUser.id, roleId: driverRole.id } });
 
   const driver2 = await prisma.driver.create({
     data: {
@@ -1008,6 +1055,35 @@ async function main() {
     }
   }
 
+  // Assign shipments to driver1 (Khaled Al-Harbi)
+  const assignedIndices = [2, 3, 4, 7, 8, 13, 19, 27, 28];
+  for (const idx of assignedIndices) {
+    await prisma.shipment.update({
+      where: { id: shipmentIds[idx] },
+      data: { driverId: driver1.id },
+    });
+    await prisma.shipmentAssignment.create({
+      data: { shipmentId: shipmentIds[idx], driverId: driver1.id, assignedBy: adminUser.id, status: "ASSIGNED" },
+    });
+  }
+
+  // Also assign a return shipment (index 7 = RETURN_PENDING) to driver1
+  await prisma.shipmentReturn.updateMany({
+    where: { shipmentId: shipmentIds[7] },
+    data: {},
+  });
+
+  // DriverShift for driver1
+  await prisma.driverShift.create({
+    data: {
+      driverId: driver1.id,
+      startedAt: new Date("2026-06-13T08:00:00"),
+      status: "ACTIVE",
+      startedBy: driverUser.id,
+      notes: "وردية اليوم - خالد الحربي",
+    },
+  });
+
   // Delivery Attempts
   await prisma.deliveryAttempt.create({
     data: { shipmentId: shipmentIds[6], driverId: driver1.id, attemptNumber: 1, status: "CUSTOMER_NOT_RESPONDING", reason: "العميل لا يرد على الهاتف", attemptedAt: new Date("2025-07-01T10:00:00"), nextAttemptAt: new Date("2025-07-02T10:00:00") },
@@ -1093,8 +1169,10 @@ async function main() {
   console.log("   admin@azmflow.com / Admin@123 (SUPER_ADMIN)");
   console.log("   manager@azmflow.com / Admin@123 (OPERATIONS_MANAGER)");
   console.log("   coordinator@azmflow.com / Admin@123 (OPERATIONS_COORDINATOR)");
+  console.log("   driver@azmflow.com / Admin@123 (DRIVER)");
   console.log("📦 Phase 2: 3 Partners, 3 Contracts, 3 Pickup Points, 3 Coverage Areas");
   console.log("📦 Phase 3: 30 Shipments, 5 Delivery Attempts, 5 PODs, 3 Returns, 1 Import Batch");
+  console.log("📱 Phase 4: DRIVER role, 9 driver permissions, 1 driver user, 9 assigned shipments, 1 active shift");
 }
 
 main()

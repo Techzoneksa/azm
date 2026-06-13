@@ -41,7 +41,9 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      const data = await res.json();
+      const isDriver = data.user?.roles?.includes("DRIVER");
+      window.location.href = isDriver ? "/driver" : "/dashboard";
     } catch {
       setError(t("common.error"));
     } finally {

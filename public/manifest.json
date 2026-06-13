@@ -1,0 +1,20 @@
+{
+  "name": "AZM Flow Driver",
+  "short_name": "AZM Driver",
+  "description": "تطبيق مناديب عزم للتوصيل",
+  "start_url": "/ar/driver",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#203860",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

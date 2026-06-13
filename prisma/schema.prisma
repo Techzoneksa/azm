@@ -19,10 +19,12 @@ model User {
   updatedAt     DateTime @updatedAt
   createdBy     String?
   updatedBy     String?
+  driverId      String?  @unique
 
   roles         UserRole[]
   auditLogs     AuditLog[]
   notifications Notification[]
+  driver        Driver?   @relation(fields: [driverId], references: [id])
 }
 
 model Role {
@@ -215,6 +217,9 @@ model Driver {
   shipments Shipment[]
   assignments ShipmentAssignment[]
   deliveryAttempts DeliveryAttempt[]
+  shifts    DriverShift[]
+  fieldLogs FieldActivityLog[]
+  user      User?
 }
 
 model DriverDocument {
@@ -843,6 +848,47 @@ model ProofOfDelivery {
   updatedAt          DateTime @updatedAt
 
   shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+}
+
+model DriverShift {
+  id               String    @id @default(uuid())
+  driverId         String
+  startedAt        DateTime?
+  endedAt          DateTime?
+  status           String    @default("NOT_STARTED")
+  startLocationLat Float?
+  startLocationLng Float?
+  endLocationLat   Float?
+  endLocationLng   Float?
+  startedBy        String?
+  endedBy          String?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  @@index([driverId])
+  @@index([status])
+}
+
+model FieldActivityLog {
+  id          String   @id @default(uuid())
+  driverId    String
+  shipmentId  String?
+  shiftId     String?
+  type        String
+  description String?
+  createdAt   DateTime @default(now())
+  locationLat Float?
+  locationLng Float?
+  deviceInfo  String?
+  metadata    String?
+
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  @@index([driverId])
+  @@index([createdAt])
 }
 
 model ShipmentReturn {
