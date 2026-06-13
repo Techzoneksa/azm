@@ -55,19 +55,20 @@ npm install
 # Create .env or configure via Hostinger panel
 # DATABASE_URL, JWT_SECRET, NEXT_PUBLIC_APP_URL, NODE_ENV
 
-# 5. Generate Prisma client
-npx prisma generate
-
-# 6. Run database migrations
+# 5. Run database migrations
 npx prisma migrate deploy
 
-# 7. Seed the database (first deployment only)
+# 6. Seed the database (first deployment only)
 npm run seed
 
-# 8. Build the application
+# 7. Build the application
 npm run build
+# Note: The build script (npm run build) automatically runs
+# `prisma generate` before `next build`, so no manual
+# Prisma Client generation is needed.
+# The postinstall script also generates Prisma Client after npm install.
 
-# 9. Start the application
+# 8. Start the application
 npm run start
 ```
 
@@ -75,12 +76,15 @@ npm run start
 
 | Command | Purpose |
 |---------|---------|
-| `npm install` | Install dependencies |
-| `npx prisma generate` | Generate Prisma client |
+| `npm install` | Install dependencies (triggers postinstall: `prisma generate`) |
 | `npx prisma migrate deploy` | Apply pending migrations |
 | `npm run seed` | Seed initial data |
-| `npm run build` | Build Next.js app |
+| `npm run build` | Build Next.js app (runs `prisma generate` before `next build`) |
 | `npm run start` | Start production server |
+
+> **Important**: The build script generates the Prisma Client automatically before the Next.js build.
+> You do **not** need to run `npx prisma generate` manually. The `postinstall` script also handles
+> generation after `npm install` for Hostinger's deployment pipeline.
 
 ## First Deployment Checklist
 
@@ -106,7 +110,7 @@ curl https://your-domain.com/api/health
 
 ## Troubleshooting
 
-- **Build fails**: Ensure Node.js version is 20+ and all dependencies are installed.
+- **Build fails**: Ensure Node.js version is 20+ and all dependencies are installed. If the error is `Can't resolve '@/generated/prisma/client'`, run `prisma generate` manually or check that the build script includes `prisma generate` before `next build`.
 - **Database connection error**: Verify `DATABASE_URL` is correct and the database is accessible from the server.
 - **Prisma migrate fails**: Check that the database user has sufficient permissions (CREATE TABLE, ALTER, etc.).
 - **Blank page**: Check the browser console for errors and verify `NEXT_PUBLIC_APP_URL` is correct.
