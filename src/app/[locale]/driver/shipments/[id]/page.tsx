@@ -65,6 +65,7 @@ interface ShipmentDetail {
 
 export default function DriverShipmentDetailPage() {
   const t = useTranslations("driver");
+  const tShip = useTranslations("shipments");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [shipment, setShipment] = useState<ShipmentDetail | null>(null);
@@ -234,7 +235,7 @@ export default function DriverShipmentDetailPage() {
                 </p>
               )}
             </div>
-            <StatusBadge status={shipment.status} />
+            <StatusBadge status={shipment.status} formatLabel={(key) => tShip("status_" + key)} />
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Clock className="size-3" />
@@ -379,7 +380,7 @@ export default function DriverShipmentDetailPage() {
               <div key={a.id} className="rounded-lg bg-gray-50 p-3 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{t("shipments.attempt") || "Attempt"} #{a.attemptNumber}</span>
-                  <StatusBadge status={a.status} />
+                  <StatusBadge status={a.status} formatLabel={(key) => tShip("status_" + key)} />
                 </div>
                 {a.reason && <p className="mt-1 text-brand-text-gray">{a.reason}</p>}
                 <p className="mt-1 text-gray-400">{new Date(a.attemptedAt).toLocaleString()}</p>

@@ -37,11 +37,13 @@ export interface StatusBadgeProps extends HTMLAttributes<HTMLDivElement> {
   status: StatusValue;
   customMap?: Record<string, StatusConfig>;
   uppercase?: boolean;
+  formatLabel?: (label: string) => string;
 }
 
 function resolveStatusConfig(
   status: StatusValue,
-  customMap?: Record<string, StatusConfig>
+  customMap?: Record<string, StatusConfig>,
+  formatLabel?: (label: string) => string
 ): StatusConfig {
   if (status === null || status === undefined) {
     return { label: "N/A", variant: "outline" };
@@ -49,8 +51,21 @@ function resolveStatusConfig(
 
   const key = String(status).toLowerCase();
 
-  if (customMap?.[key]) return customMap[key];
+  if (customMap?.[key]) {
+    const entry = customMap[key];
+    if (entry.label) return entry;
+    if (formatLabel) {
+      const label = formatLabel(key);
+      if (label) return { label, variant: entry.variant };
+    }
+    return entry;
+  }
   if (defaultStatusMap[key]) return defaultStatusMap[key];
+
+  if (formatLabel) {
+    const label = formatLabel(key);
+    if (label) return { label, variant: "secondary" };
+  }
 
   return { label: String(status), variant: "secondary" };
 }
@@ -59,10 +74,11 @@ function StatusBadge({
   status,
   customMap,
   uppercase = false,
+  formatLabel,
   className,
   ...props
 }: StatusBadgeProps) {
-  const config = resolveStatusConfig(status, customMap);
+  const config = resolveStatusConfig(status, customMap, formatLabel);
 
   return (
     <Badge

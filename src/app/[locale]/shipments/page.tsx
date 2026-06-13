@@ -41,6 +41,7 @@ export default function ShipmentsPage() {
   const t = useTranslations("shipments");
   const tCommon = useTranslations("common");
   const tVal = useTranslations("validation");
+  const fmtStatus = (key: string) => t("status_" + key);
   const locale = useLocale();
   const router = useRouter();
 
@@ -330,7 +331,7 @@ export default function ShipmentsPage() {
                           <TableCell>{s.partner?.tradingNameAr ?? "-"}</TableCell>
                           <TableCell>{s.recipientName}</TableCell>
                           <TableCell>{s.city}</TableCell>
-                          <TableCell><StatusBadge status={s.status} /></TableCell>
+                          <TableCell><StatusBadge status={s.status} formatLabel={fmtStatus} /></TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-700">
                               {t(`priority_${s.priority?.toLowerCase()}`)}

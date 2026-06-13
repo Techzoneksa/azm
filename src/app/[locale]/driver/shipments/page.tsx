@@ -26,12 +26,12 @@ interface Shipment {
 }
 
 const statusFilters = [
-  { key: "", label: "All" },
-  { key: "ASSIGNED_TO_DRIVER", label: "Ready" },
-  { key: "OUT_FOR_DELIVERY", label: "Out for Delivery" },
-  { key: "FAILED_ATTEMPT", label: "Failed" },
-  { key: "DELIVERED", label: "Delivered" },
-  { key: "RETURN_PENDING", label: "Returned" },
+  { key: "", labelKey: "shipments.all" },
+  { key: "ASSIGNED_TO_DRIVER", labelKey: "shipments.ready" },
+  { key: "OUT_FOR_DELIVERY", labelKey: "shipments.outForDelivery" },
+  { key: "FAILED_ATTEMPT", labelKey: "shipments.failed" },
+  { key: "DELIVERED", labelKey: "shipments.delivered" },
+  { key: "RETURN_PENDING", labelKey: "shipments.returned" },
 ];
 
 const priorityColors: Record<string, string> = {
@@ -51,6 +51,7 @@ const statusToVariant: Record<string, string> = {
 
 export default function DriverShipmentsPage() {
   const t = useTranslations("driver");
+  const tShip = useTranslations("shipments");
   const searchParams = useSearchParams();
   const activeFilter = searchParams.get("status") || "";
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -116,7 +117,7 @@ export default function DriverShipmentsPage() {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {f.label}
+              {t(f.labelKey)}
             </Link>
           );
         })}
@@ -164,10 +165,11 @@ export default function DriverShipmentsPage() {
                         </span>
                         <StatusBadge
                           status={s.status}
+                          formatLabel={(key) => tShip("status_" + key)}
                           customMap={Object.fromEntries(
                             Object.entries(statusToVariant).map(([k, v]) => [
                               k.toLowerCase(),
-                              { label: t(`shipments.status.${k}`) || k, variant: v as "default" | "secondary" | "destructive" | "success" | "warning" | "outline" },
+                              { label: "", variant: v as "default" | "secondary" | "destructive" | "success" | "warning" | "outline" },
                             ])
                           )}
                         />

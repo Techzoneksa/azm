@@ -38,6 +38,8 @@ export default function ReturnDetailPage() {
   const t = useTranslations("returns");
   const tShip = useTranslations("shipments");
   const tCommon = useTranslations("common");
+  const fmtShipStatus = (key: string) => tShip("status_" + key);
+  const fmtReturnStatus = (key: string) => t("status_" + key);
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -144,7 +146,7 @@ export default function ReturnDetailPage() {
             <CardContent className="grid gap-4 sm:grid-cols-3">
               <div><dt className="text-xs font-medium text-gray-500">{tShip("recipientName")}</dt><dd className="mt-0.5 text-sm text-gray-900">{returnEntry.shipment.recipientName}</dd></div>
               <div><dt className="text-xs font-medium text-gray-500">{tShip("city")}</dt><dd className="mt-0.5 text-sm text-gray-900">{returnEntry.shipment.city}</dd></div>
-              <div><dt className="text-xs font-medium text-gray-500">{tCommon("status")}</dt><dd className="mt-0.5"><StatusBadge status={returnEntry.shipment.status} /></dd></div>
+              <div><dt className="text-xs font-medium text-gray-500">{tCommon("status")}</dt><dd className="mt-0.5"><StatusBadge status={returnEntry.shipment.status} formatLabel={fmtShipStatus} /></dd></div>
             </CardContent>
           </Card>
         )}
@@ -156,7 +158,7 @@ export default function ReturnDetailPage() {
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div><dt className="text-xs font-medium text-gray-500">{t("reason")}</dt><dd className="mt-0.5 text-sm text-gray-900">{t(`reason_${returnEntry.reason}`)}</dd></div>
-              <div><dt className="text-xs font-medium text-gray-500">{t("status")}</dt><dd className="mt-0.5"><StatusBadge status={returnEntry.status} /></dd></div>
+              <div><dt className="text-xs font-medium text-gray-500">{t("status")}</dt><dd className="mt-0.5"><StatusBadge status={returnEntry.status} formatLabel={fmtReturnStatus} /></dd></div>
               <div><dt className="text-xs font-medium text-gray-500">{t("returnRequestedAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnRequestedAt).toLocaleString()}</dd></div>
               {returnEntry.returnDueAt && <div><dt className="text-xs font-medium text-gray-500">{t("returnDueAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnDueAt).toLocaleString()}</dd></div>}
               {returnEntry.returnedAt && <div><dt className="text-xs font-medium text-gray-500">{t("returnedAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnedAt).toLocaleString()}</dd></div>}

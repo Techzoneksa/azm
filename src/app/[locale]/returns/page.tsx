@@ -31,6 +31,7 @@ export default function ReturnsPage() {
   const t = useTranslations("returns");
   const tShip = useTranslations("shipments");
   const tCommon = useTranslations("common");
+  const fmtStatus = (key: string) => t("status_" + key);
   const locale = useLocale();
   const router = useRouter();
 
@@ -175,7 +176,7 @@ export default function ReturnsPage() {
                             {t(`reason_${r.reason}`)}
                           </TableCell>
                           <TableCell>
-                            <StatusBadge status={r.status} />
+                            <StatusBadge status={r.status} formatLabel={fmtStatus} />
                           </TableCell>
                           <TableCell className="text-xs text-gray-500">
                             {new Date(r.returnRequestedAt).toLocaleDateString()}

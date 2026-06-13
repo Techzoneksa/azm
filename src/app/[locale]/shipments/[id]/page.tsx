@@ -121,6 +121,9 @@ export default function ShipmentDetailPage() {
   const tAttempts = useTranslations("deliveryAttempts");
   const tReturns = useTranslations("returns");
   const tCommon = useTranslations("common");
+  const fmtStatus = (key: string) => t("status_" + key);
+  const fmtAttemptStatus = (key: string) => tAttempts("status_" + key);
+  const fmtReturnStatus = (key: string) => tReturns("status_" + key);
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -331,7 +334,7 @@ export default function ShipmentDetailPage() {
     { label: t("entrySource"), value: t(`entry_${shipment.entrySource?.toLowerCase()}`) },
     { label: t("validationStatus"), value: t(`validation_${shipment.validationStatus?.toLowerCase()}`) },
     { label: t("lastStatusUpdate"), value: shipment.lastStatusUpdate ? new Date(shipment.lastStatusUpdate).toLocaleString() : "-" },
-    { label: tCommon("status"), value: <StatusBadge status={shipment.status} /> },
+    { label: tCommon("status"), value: <StatusBadge status={shipment.status} formatLabel={fmtStatus} /> },
   ];
 
   return (
@@ -370,7 +373,7 @@ export default function ShipmentDetailPage() {
                 <CardTitle>{shipment.trackingNumber}</CardTitle>
                 <CardDescription>{shipment.recipientName} - {shipment.city}</CardDescription>
               </div>
-              <StatusBadge status={shipment.status} />
+              <StatusBadge status={shipment.status} formatLabel={fmtStatus} />
             </div>
           </CardHeader>
         </Card>
@@ -429,9 +432,9 @@ export default function ShipmentDetailPage() {
                       </div>
                       <div className="pb-4">
                         <div className="flex items-center gap-2">
-                          <StatusBadge status={entry.oldStatus} />
+                          <StatusBadge status={entry.oldStatus} formatLabel={fmtStatus} />
                           <span className="text-sm text-gray-500">&rarr;</span>
-                          <StatusBadge status={entry.newStatus} />
+                          <StatusBadge status={entry.newStatus} formatLabel={fmtStatus} />
                         </div>
                         <p className="mt-1 text-xs text-gray-500">
                           {entry.changedBy} - {new Date(entry.changedAt).toLocaleString()}
@@ -523,7 +526,7 @@ export default function ShipmentDetailPage() {
                       {attempts.map((a) => (
                         <TableRow key={a._id}>
                           <TableCell>{a.attemptNumber}</TableCell>
-                          <TableCell><StatusBadge status={a.status} /></TableCell>
+                          <TableCell><StatusBadge status={a.status} formatLabel={fmtAttemptStatus} /></TableCell>
                           <TableCell>{a.reason ?? "-"}</TableCell>
                           <TableCell>{a.notes ?? "-"}</TableCell>
                           <TableCell>{new Date(a.attemptedAt).toLocaleString()}</TableCell>
@@ -586,7 +589,7 @@ export default function ShipmentDetailPage() {
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div><dt className="text-xs font-medium text-gray-500">{tReturns("reason")}</dt><dd className="mt-0.5 text-sm text-gray-900">{tReturns(`reason_${returnEntry.reason}`)}</dd></div>
-                  <div><dt className="text-xs font-medium text-gray-500">{tReturns("status")}</dt><dd className="mt-0.5 text-sm text-gray-900"><StatusBadge status={returnEntry.status} /></dd></div>
+                  <div><dt className="text-xs font-medium text-gray-500">{tReturns("status")}</dt><dd className="mt-0.5 text-sm text-gray-900"><StatusBadge status={returnEntry.status} formatLabel={fmtReturnStatus} /></dd></div>
                   <div><dt className="text-xs font-medium text-gray-500">{tReturns("returnRequestedAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnRequestedAt).toLocaleString()}</dd></div>
                   {returnEntry.returnDueAt && <div><dt className="text-xs font-medium text-gray-500">{tReturns("returnDueAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnDueAt).toLocaleString()}</dd></div>}
                   {returnEntry.returnedAt && <div><dt className="text-xs font-medium text-gray-500">{tReturns("returnedAt")}</dt><dd className="mt-0.5 text-sm text-gray-900">{new Date(returnEntry.returnedAt).toLocaleString()}</dd></div>}

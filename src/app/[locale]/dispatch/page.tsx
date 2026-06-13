@@ -41,6 +41,7 @@ export default function DispatchPage() {
   const t = useTranslations("dispatch");
   const tShip = useTranslations("shipments");
   const tCommon = useTranslations("common");
+  const fmtStatus = (key: string) => tShip("status_" + key);
   const locale = useLocale();
   const router = useRouter();
 
@@ -298,7 +299,7 @@ export default function DispatchPage() {
                           </div>
                           <div className="flex shrink-0 flex-col items-end gap-1">
                             <span className="text-xs text-gray-400">{getTimeSince(s.lastStatusUpdate)}</span>
-                            <StatusBadge status={s.status} />
+                            <StatusBadge status={s.status} formatLabel={fmtStatus} />
                           </div>
                         </div>
                         {col.status === "READY_FOR_DISPATCH" && !s.driver && (

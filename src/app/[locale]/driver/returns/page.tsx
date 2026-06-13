@@ -29,6 +29,7 @@ interface ReturnItem {
 
 export default function DriverReturnsPage() {
   const t = useTranslations("driver");
+  const tReturns = useTranslations("returns");
   const [returns, setReturns] = useState<ReturnItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -113,14 +114,14 @@ export default function DriverReturnsPage() {
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                     <Badge variant="destructive" className="text-[10px]">
-                      {r.reason.replace(/_/g, " ")}
+                      {tReturns(`reason_${r.reason}`)}
                     </Badge>
-                    <StatusBadge status={r.status} className="text-[10px]" />
+                    <StatusBadge status={r.status} className="text-[10px]" formatLabel={(key) => tReturns("status_" + key)} />
                   </div>
                   <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
                     <Calendar className="size-3" />
                     <span>
-                      {t("returns.requestedAt") || "Requested"}: {new Date(r.returnRequestedAt).toLocaleDateString()}
+                      {tReturns("returnRequestedAt")}: {new Date(r.returnRequestedAt).toLocaleDateString()}
                     </span>
                   </div>
                   {r.notes && (
